@@ -28,7 +28,13 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
   const [activeStation, setActiveStation] = useState(null)
   const [scanning,      setScanning]      = useState(false)
   const [introVisible,  setIntroVisible]  = useState(true)
+  const [decoyFlash,    setDecoyFlash]    = useState(null)   // id of active decoy flash
   const openedAt = useRef(null)
+
+  const clickDecoy = (id) => {
+    setDecoyFlash(id)
+    setTimeout(() => setDecoyFlash(null), 1100)
+  }
   const configuredCount = Object.values(scores).filter(v => v !== null).length
 
   useEffect(() => {
@@ -215,7 +221,6 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
         </div>
         <div className="desk-body" />
         {scores.people !== null && <div className="iz-check-banner">✓ CONFIGURED</div>}
-        <div className="rm-hint">POPULATION CONTROL</div>
         {formatTime(times.people) && <div className="rm-time-badge">{formatTime(times.people)}</div>}
       </div>
 
@@ -231,7 +236,6 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
           </div>
         ))}
         {scores.memory !== null && <div className="iz-check-banner">✓</div>}
-        <div className="rm-hint">MEMORY ARCHIVE</div>
         {formatTime(times.memory) && <div className="rm-time-badge">{formatTime(times.memory)}</div>}
       </div>
 
@@ -257,7 +261,6 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
           ))}
         </div>
         {scores.environment !== null && <div className="iz-check-banner">✓</div>}
-        <div className="rm-hint">ECOLOGICAL BALANCE</div>
         {formatTime(times.environment) && <div className="rm-time-badge">{formatTime(times.environment)}</div>}
       </div>
 
@@ -280,7 +283,6 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
           ))}
         </div>
         {scores.economy !== null && <div className="iz-check-banner">✓</div>}
-        <div className="rm-hint">ECONOMIC DENSITY MATRIX</div>
         {formatTime(times.economy) && <div className="rm-time-badge">{formatTime(times.economy)}</div>}
       </div>
 
@@ -323,7 +325,6 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
           ))}
         </svg>
         {scores.infrastructure !== null && <div className="iz-check-banner">✓</div>}
-        <div className="rm-hint">INFRASTRUCTURE GRID</div>
         {formatTime(times.infrastructure) && <div className="rm-time-badge">{formatTime(times.infrastructure)}</div>}
       </div>
 
@@ -427,6 +428,105 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
             animationDelay: q.delay,
           }}>?</div>
         ))}
+      </div>
+
+      {/* ═══════════════════════════════════════════
+          DECOY PANELS — look interactive but do nothing
+      ═══════════════════════════════════════════ */}
+
+      {/* Decoy A — wall keypad, left upper */}
+      <div className="rm-decoy dc-a" onClick={() => clickDecoy('a')}>
+        {decoyFlash === 'a' && <div className="dc-denied">⚠ OFFLINE</div>}
+        <div className="dc-title">AUTH·PAD</div>
+        <div className="dc-keypad">
+          {[1,2,3,4,5,6,7,8,9,'*',0,'#'].map(k => (
+            <div key={k} className="dc-key">{k}</div>
+          ))}
+        </div>
+        <div className="dc-status-row"><div className="dc-led dc-led-r"/><span>LOCKED</span></div>
+      </div>
+
+      {/* Decoy B — small LCD display, upper centre-left */}
+      <div className="rm-decoy dc-b" onClick={() => clickDecoy('b')}>
+        {decoyFlash === 'b' && <div className="dc-denied">⚠ OFFLINE</div>}
+        <div className="dc-lcd">
+          <div className="dc-lcd-row">SYS·ID  :: 04-C</div>
+          <div className="dc-lcd-row">STATUS  :: FAULT</div>
+          <div className="dc-lcd-row">TEMP    :: 94°C</div>
+          <div className="dc-lcd-row blink-row">▶ AWAITING CMD</div>
+        </div>
+        <div className="dc-btn-row">
+          <div className="dc-btn">RST</div>
+          <div className="dc-btn">CFG</div>
+          <div className="dc-btn dc-btn-a">ACK</div>
+        </div>
+      </div>
+
+      {/* Decoy C — ventilation/HVAC panel, right wall upper */}
+      <div className="rm-decoy dc-c" onClick={() => clickDecoy('c')}>
+        {decoyFlash === 'c' && <div className="dc-denied">⚠ OFFLINE</div>}
+        <div className="dc-title">HVAC·CTRL</div>
+        <div className="dc-dial-row">
+          <div className="dc-dial"><div className="dc-dial-mark"/></div>
+          <div className="dc-dial dc-dial-2"><div className="dc-dial-mark"/></div>
+        </div>
+        <div className="dc-bar-stack">
+          {[60,40,75,30,55].map((w,i) => (
+            <div key={i} className="dc-minibar"><div className="dc-minibar-fill" style={{width:`${w}%`}}/></div>
+          ))}
+        </div>
+      </div>
+
+      {/* Decoy D — comms/intercom panel, left lower */}
+      <div className="rm-decoy dc-d" onClick={() => clickDecoy('d')}>
+        {decoyFlash === 'd' && <div className="dc-denied">⚠ OFFLINE</div>}
+        <div className="dc-title">COMM·SYS</div>
+        <div className="dc-freq">142.650 MHz</div>
+        <div className="dc-wave">
+          {Array.from({length:18}).map((_,i) => (
+            <div key={i} className="dc-wave-bar" style={{height:`${20+Math.sin(i*0.8)*14}px`, animationDelay:`${i*0.08}s`}}/>
+          ))}
+        </div>
+        <div className="dc-status-row"><div className="dc-led dc-led-y"/><span>STANDBY</span></div>
+      </div>
+
+      {/* Decoy E — sub-breaker panel, centre wall */}
+      <div className="rm-decoy dc-e" onClick={() => clickDecoy('e')}>
+        {decoyFlash === 'e' && <div className="dc-denied">⚠ OFFLINE</div>}
+        <div className="dc-title">SUB·DIST B</div>
+        <div className="dc-switches">
+          {['ON','ON','OFF','ON','OFF','ON'].map((s,i) => (
+            <div key={i} className={`dc-switch dc-sw-${s.toLowerCase()}`}>
+              <div className="dc-sw-toggle"/><span>{i+7}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Decoy F — data terminal, right lower */}
+      <div className="rm-decoy dc-f" onClick={() => clickDecoy('f')}>
+        {decoyFlash === 'f' && <div className="dc-denied">⚠ OFFLINE</div>}
+        <div className="dc-lcd">
+          <div className="dc-lcd-row">NODE·B :: TIMEOUT</div>
+          <div className="dc-lcd-row">PKT·LOSS :: 87%</div>
+          <div className="dc-lcd-row blink-row">▶ RECONNECTING…</div>
+        </div>
+        <div className="dc-status-row"><div className="dc-led dc-led-r"/><span>ERROR</span></div>
+      </div>
+
+      {/* Decoy G — access control panel, far right */}
+      <div className="rm-decoy dc-g" onClick={() => clickDecoy('g')}>
+        {decoyFlash === 'g' && <div className="dc-denied">⚠ OFFLINE</div>}
+        <div className="dc-title">ZONE·ACCESS</div>
+        <div className="dc-zones">
+          {['Z-1','Z-2','Z-3','Z-4'].map((z,i) => (
+            <div key={i} className="dc-zone-row">
+              <div className={`dc-led ${i===1?'dc-led-r':'dc-led-g'}`}/>
+              <span>{z}</span>
+              <span className="dc-zone-st">{i===1?'DENIED':'CLEAR'}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ─── FLOOR CABLES ─── */}

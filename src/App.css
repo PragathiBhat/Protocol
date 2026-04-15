@@ -786,6 +786,97 @@
 }
 .rm-obj:hover { filter:brightness(1.4); transform:translateY(-2px); }
 
+/* ════════════════════════════════════════════════
+   DECOY PANELS
+   ════════════════════════════════════════════════ */
+.rm-decoy {
+  position:absolute; z-index:5; cursor:pointer;
+  background:#07111c; border:1px solid #142030;
+  padding:8px 10px;
+  box-shadow:0 4px 20px rgba(0,0,0,.85);
+  font-size:8px; letter-spacing:1.5px; color:#1e3a50;
+  transition:filter .2s, transform .18s;
+  animation:breathe 6s ease-in-out infinite;
+}
+.rm-decoy:hover { filter:brightness(1.3); transform:translateY(-2px); animation:none; }
+
+/* ACCESS DENIED flash */
+.dc-denied {
+  position:absolute; inset:0; z-index:20;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(180,0,0,.82); color:#fff;
+  font-size:10px; letter-spacing:2px;
+  animation:fadeIn .1s ease;
+}
+
+.dc-title { font-size:7px; letter-spacing:2.5px; color:#1a3040; margin-bottom:6px; padding-bottom:4px; border-bottom:1px solid #0e2030; }
+
+/* Keypad */
+.dc-keypad { display:grid; grid-template-columns:repeat(3,1fr); gap:3px; margin-bottom:6px; }
+.dc-key { background:#0b1e2e; border:1px solid #142030; text-align:center; padding:4px 0; font-size:8px; color:#1e3a50; border-radius:1px; }
+
+/* Status row */
+.dc-status-row { display:flex; align-items:center; gap:5px; font-size:7px; color:#1a3040; }
+.dc-led { width:6px; height:6px; border-radius:50%; }
+.dc-led-r { background:#cc2200; box-shadow:0 0 5px #cc2200; animation:blink 2s step-end infinite; }
+.dc-led-g { background:#00aa44; box-shadow:0 0 5px #00aa44; }
+.dc-led-y { background:#aaaa00; box-shadow:0 0 5px #aaaa00; animation:blink 3s step-end infinite; }
+
+/* LCD screen */
+.dc-lcd { background:#010c06; border:1px solid #0a2010; padding:5px 6px; margin-bottom:6px; }
+.dc-lcd-row { font-size:7px; color:rgba(0,200,60,.6); letter-spacing:1px; padding:1px 0; font-family:'Courier New',monospace; }
+.blink-row { animation:blink 1.4s step-end infinite; }
+
+/* Buttons */
+.dc-btn-row { display:flex; gap:4px; }
+.dc-btn { background:#0b1e2e; border:1px solid #142030; padding:3px 7px; font-size:7px; color:#1e3a50; border-radius:1px; }
+.dc-btn-a { border-color:#cc220044; color:#cc2200; }
+
+/* Dials */
+.dc-dial-row { display:flex; gap:10px; justify-content:center; margin-bottom:6px; }
+.dc-dial {
+  width:28px; height:28px; border-radius:50%;
+  background:radial-gradient(circle, #0d1e2c, #060e18);
+  border:2px solid #142030; position:relative;
+}
+.dc-dial-2 { border-color:#1a3040; }
+.dc-dial-mark { position:absolute; top:3px; left:50%; transform:translateX(-50%); width:2px; height:8px; background:#1e3a50; border-radius:1px; }
+
+/* Mini bars */
+.dc-bar-stack { display:flex; flex-direction:column; gap:2px; }
+.dc-minibar { background:#080f18; height:5px; border-radius:1px; width:100%; }
+.dc-minibar-fill { height:100%; background:#1e3a50; border-radius:1px; }
+
+/* Frequency display */
+.dc-freq { font-size:10px; color:rgba(255,170,0,.5); letter-spacing:2px; text-align:center; padding:4px 0; margin-bottom:4px; }
+
+/* Wave bars */
+.dc-wave { display:flex; align-items:center; gap:2px; height:32px; margin-bottom:6px; }
+.dc-wave-bar { width:3px; background:#1e3a50; border-radius:1px; animation:bar-pulse 2.5s ease-in-out infinite; }
+
+/* Sub-breaker switches */
+.dc-switches { display:grid; grid-template-columns:repeat(3,1fr); gap:3px; }
+.dc-switch { display:flex; flex-direction:column; align-items:center; gap:2px; padding:4px 2px; background:#080f18; border:1px solid #0e1e2e; }
+.dc-sw-toggle { width:8px; height:14px; border-radius:2px; background:#0e1e2e; border:1px solid #142030; }
+.dc-sw-on .dc-sw-toggle { background:#006622; border-color:#00aa44; }
+.dc-sw-off .dc-sw-toggle { background:#220000; border-color:#440000; }
+.dc-switch span { font-size:6px; color:#1a3040; }
+
+/* Zone access */
+.dc-zones { display:flex; flex-direction:column; gap:4px; }
+.dc-zone-row { display:flex; align-items:center; gap:5px; }
+.dc-zone-row span { font-size:7px; color:#1a3040; }
+.dc-zone-st { margin-left:auto; font-size:6px; }
+
+/* Positions */
+.dc-a { left:3%;  top:40%; width:clamp(70px,8%,110px); }
+.dc-b { left:31%; top:8%;  width:clamp(110px,13%,170px); }
+.dc-c { left:56%; top:14%; width:clamp(100px,12%,155px); }
+.dc-d { left:3%;  top:62%; width:clamp(100px,11%,150px); }
+.dc-e { left:28%; top:55%; width:clamp(95px,11%,145px); }
+.dc-f { left:56%; top:55%; width:clamp(110px,13%,165px); }
+.dc-g { left:83%; top:36%; width:clamp(90px,10%,135px); }
+
 /* Hover hint — revealed only on hover */
 .rm-hint {
   position:absolute; bottom:-26px; left:50%; transform:translateX(-50%);
