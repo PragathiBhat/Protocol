@@ -2,6 +2,7 @@ import { useState } from 'react'
 import IntroScreen from './components/IntroScreen'
 import MainRoom from './components/MainRoom'
 import CityScreen from './components/CityScreen'
+import MusicPlayer from './components/MusicPlayer'
 import './App.css'
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
 
   return (
     <div className="game-root">
+      <MusicPlayer />
       {phase === 'intro' && (
         <IntroScreen onEnter={() => setPhase('room')} />
       )}

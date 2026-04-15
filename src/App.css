@@ -1,6 +1,66 @@
 /* ============================================================
-   ESCAPE ALEXANDERPLATZ — Game Styles
+   PROTOCOL — Game Styles
    ============================================================ */
+
+/* ── MUSIC PLAYER ── */
+.music-player {
+  position: fixed;
+  bottom: 18px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(4, 8, 20, 0.88);
+  border: 1px solid rgba(0, 212, 255, 0.18);
+  padding: 6px 10px;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: #1e4a6a;
+  backdrop-filter: blur(6px);
+  transition: opacity 0.3s;
+}
+.mp-off { opacity: 0.45; }
+.mp-on  { opacity: 1; }
+
+/* Animated bars (visualiser) */
+.mp-indicator {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+  width: 20px;
+}
+.mp-bar {
+  width: 3px;
+  background: var(--cyan);
+  border-radius: 1px;
+  animation: mp-bounce 0.7s ease-in-out infinite alternate;
+}
+.mp-bar:nth-child(2) { animation-duration: 0.5s; }
+.mp-bar:nth-child(3) { animation-duration: 0.9s; }
+.mp-bar:nth-child(4) { animation-duration: 0.6s; }
+.mp-bar-flat { height: 2px !important; background: #1e3a50; animation: none; }
+@keyframes mp-bounce {
+  from { height: 3px;  opacity: 0.5; }
+  to   { height: 13px; opacity: 1;   }
+}
+
+.mp-track-btn, .mp-mute-btn {
+  background: transparent;
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  color: var(--cyan);
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  padding: 3px 7px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.mp-track-btn:hover { border-color: var(--cyan); background: rgba(0,212,255,0.08); }
+.mp-mute-btn { color: #1e4a6a; border-color: rgba(0,212,255,0.1); }
+.mp-mute-btn:hover { color: var(--pink); border-color: var(--pink); }
 
 :root {
   --bg:      #06030e;
