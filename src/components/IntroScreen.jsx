@@ -24,42 +24,62 @@ function MapBackground() {
       s.id = 'alex-pulse-style'
       s.textContent = `
         @keyframes alex-ring-pulse {
-          0%,100% { transform:translate(-50%,-50%) scale(1);    opacity:.85; }
-          50%      { transform:translate(-50%,-50%) scale(1.25); opacity:1;   }
+          0%,100% { transform:translate(-50%,-50%) scale(1);    opacity:.95; }
+          50%      { transform:translate(-50%,-50%) scale(1.28); opacity:1;   }
+        }
+        @keyframes alex-ring-mid {
+          0%,100% { transform:translate(-50%,-50%) scale(1);    opacity:.55; }
+          50%      { transform:translate(-50%,-50%) scale(1.35); opacity:.85; }
         }
         @keyframes alex-ring-outer {
-          0%,100% { transform:translate(-50%,-50%) scale(1);    opacity:.4; }
-          50%      { transform:translate(-50%,-50%) scale(1.45); opacity:.75; }
+          0%,100% { transform:translate(-50%,-50%) scale(1);    opacity:.3; }
+          50%      { transform:translate(-50%,-50%) scale(1.5);  opacity:.6; }
+        }
+        @keyframes alex-label-blink {
+          0%,100% { opacity:1; }
+          48%,52% { opacity:0.4; }
         }
         .alex-ring-inner {
           position:absolute; left:50%; top:50%;
-          width:72px; height:72px; border-radius:50%;
-          border:2px solid #ff7700;
-          background:rgba(255,119,0,0.12);
+          width:80px; height:80px; border-radius:50%;
+          border:2.5px solid #ff8800;
+          background:rgba(255,140,0,0.18);
           transform:translate(-50%,-50%);
-          animation:alex-ring-pulse 2.4s ease-in-out infinite;
+          box-shadow:0 0 18px 4px rgba(255,130,0,.45);
+          animation:alex-ring-pulse 2.2s ease-in-out infinite;
+        }
+        .alex-ring-mid {
+          position:absolute; left:50%; top:50%;
+          width:140px; height:140px; border-radius:50%;
+          border:1.5px solid rgba(255,160,0,0.65);
+          transform:translate(-50%,-50%);
+          animation:alex-ring-mid 2.2s ease-in-out infinite .4s;
         }
         .alex-ring-outer {
           position:absolute; left:50%; top:50%;
-          width:148px; height:148px; border-radius:50%;
-          border:1px solid rgba(255,140,0,0.5);
+          width:210px; height:210px; border-radius:50%;
+          border:1px solid rgba(255,140,0,0.35);
           transform:translate(-50%,-50%);
-          animation:alex-ring-outer 2.4s ease-in-out infinite;
+          animation:alex-ring-outer 2.2s ease-in-out infinite .8s;
         }
         .alex-dot {
           position:absolute; left:50%; top:50%;
-          width:10px; height:10px; border-radius:50%;
-          background:#ffaa00;
+          width:13px; height:13px; border-radius:50%;
+          background:#ffcc00;
           transform:translate(-50%,-50%);
-          box-shadow:0 0 12px 5px rgba(255,170,0,.85);
+          box-shadow:0 0 18px 7px rgba(255,200,0,.95), 0 0 36px 12px rgba(255,140,0,.5);
         }
         .alex-label {
-          position:absolute; left:50%; top:calc(50% + 56px);
+          position:absolute; left:50%; top:calc(50% + 68px);
           transform:translateX(-50%);
           font-family:'Courier New',monospace;
-          font-size:9px; letter-spacing:4px; color:#ffaa00;
+          font-size:11px; letter-spacing:5px; color:#ffcc00;
           white-space:nowrap;
-          text-shadow:0 0 10px rgba(255,170,0,.9);
+          background:rgba(0,0,0,0.65);
+          padding:3px 10px;
+          border:1px solid rgba(255,180,0,0.4);
+          text-shadow:0 0 14px rgba(255,200,0,1);
+          animation:alex-label-blink 3s ease-in-out infinite;
         }
       `
       document.head.appendChild(s)
@@ -172,12 +192,13 @@ function MapBackground() {
 
       /* ── Alexanderplatz glowing marker ── */
       const el = document.createElement('div')
-      el.style.cssText = 'position:relative;width:148px;height:148px;pointer-events:none;'
+      el.style.cssText = 'position:relative;width:210px;height:210px;pointer-events:none;'
       el.innerHTML = `
         <div class="alex-ring-outer"></div>
+        <div class="alex-ring-mid"></div>
         <div class="alex-ring-inner"></div>
         <div class="alex-dot"></div>
-        <div class="alex-label">ALEXANDERPLATZ</div>
+        <div class="alex-label">◈ ALEXANDERPLATZ</div>
       `
       new maplibregl.Marker({ element: el, anchor: 'center' })
         .setLngLat(ALEX)
@@ -198,10 +219,10 @@ export default function IntroScreen({ onEnter }) {
 
   const titleDone = typedCount >= TITLE.length
 
-  // Type out PROTOCOL super fast (55 ms per letter)
+  // Type out PROTOCOL — deliberate pace (200 ms per letter)
   useEffect(() => {
     if (typedCount < TITLE.length) {
-      const t = setTimeout(() => setTypedCount(c => c + 1), 55)
+      const t = setTimeout(() => setTypedCount(c => c + 1), 200)
       return () => clearTimeout(t)
     }
   }, [typedCount])
