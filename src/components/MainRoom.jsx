@@ -17,6 +17,40 @@ const STATION_MAP = {
 /* Stable "random" bits for background decoration */
 const BITS = '10110010110100110101001011010110100101101001011010011010'.split('')
 
+/* ── Layout randomiser ── */
+function shuffle(arr) {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
+function generateLayout() {
+  // 7 cols × 4 rows grid across the wall area (top 14 – 65%)
+  const cols = [2, 13, 26, 39, 52, 65, 78]
+  const rows = [14, 31, 48, 62]
+  const slots = []
+  rows.forEach(t => cols.forEach(l => {
+    const jl = +(l + (Math.random() * 2.5 - 1.25)).toFixed(1)
+    const jt = +(t + (Math.random() * 2.5 - 1.25)).toFixed(1)
+    slots.push({ left: `${jl}%`, top: `${jt}%` })
+  }))
+  const shuffled = shuffle(slots)
+
+  // Monitors stay horizontally centred (CSS handles left/right) — only randomise top
+  const monTop = +(14 + Math.random() * 9).toFixed(1)
+
+  const ids = [
+    'cabinet','gauges','ticker','server',
+    'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p',
+  ]
+  const pos = { monitors: { top: `${monTop}%` } }
+  ids.forEach((id, i) => { pos[id] = shuffled[i] })
+  return pos
+}
+
 function formatTime(ms) {
   if (ms === null || ms === undefined) return null
   const s = Math.round(ms / 1000)
@@ -28,7 +62,8 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
   const [activeStation, setActiveStation] = useState(null)
   const [scanning,      setScanning]      = useState(false)
   const [introVisible,  setIntroVisible]  = useState(true)
-  const [decoyFlash,    setDecoyFlash]    = useState(null)   // id of active decoy flash
+  const [decoyFlash,    setDecoyFlash]    = useState(null)
+  const [layout]                          = useState(generateLayout)   // randomised on every load
   const openedAt = useRef(null)
 
   const clickDecoy = (id) => {
@@ -164,6 +199,7 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
 
       {/* ── 1. MONITOR CLUSTER — People ── */}
       <div className={`rm-obj rm-monitors ${dk('people')} ${sc('people')}`}
+           style={layout.monitors}
            onClick={() => open('people')}>
         <div className="mon-group">
           {/* Left monitor — green terminal */}
@@ -226,6 +262,7 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
 
       {/* ── 2. FILING CABINET — Memory ── */}
       <div className={`rm-obj rm-cabinet ${dk('memory')} ${sc('memory')}`}
+           style={layout.cabinet}
            onClick={() => open('memory')}>
         <div className="cab-header">ARCHIVE</div>
         {['A–F', 'G–M', 'N–Z'].map((lbl, i) => (
@@ -241,6 +278,7 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
 
       {/* ── 3. GAUGE PANEL — Environment ── */}
       <div className={`rm-obj rm-gauges ${dk('environment')} ${sc('environment')}`}
+           style={layout.gauges}
            onClick={() => open('environment')}>
         <div className="gauges-title">ECO / BAL</div>
         <div className="gauges-row">
@@ -266,6 +304,7 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
 
       {/* ── 4. DATA TICKER — Economy ── */}
       <div className={`rm-obj rm-ticker ${dk('economy')} ${sc('economy')}`}
+           style={layout.ticker}
            onClick={() => open('economy')}>
         <div className="ticker-header">◈ MARKET FEED</div>
         <div className="ticker-body">
@@ -288,6 +327,7 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
 
       {/* ── 5. SERVER / CABLE RACK — Infrastructure ── */}
       <div className={`rm-obj rm-server ${dk('infrastructure')} ${sc('infrastructure')}`}
+           style={layout.server}
            onClick={() => open('infrastructure')}>
         <div className="srv-label">SYS GRID</div>
         <div className="srv-units">
@@ -436,8 +476,8 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
           DECOY PANELS — look interactive but do nothing
       ═══════════════════════════════════════════ */}
 
-      {/* Decoy A — wall keypad, left upper */}
-      <div className="rm-decoy dc-a" onClick={() => clickDecoy('a')}>
+      {/* Decoy A — wall keypad */}
+      <div className="rm-decoy dc-a" style={layout.a} onClick={() => clickDecoy('a')}>
         {decoyFlash === 'a' && <div className="dc-denied">⚠ OFFLINE</div>}
         <div className="dc-title">AUTH·PAD</div>
         <div className="dc-keypad">
@@ -448,8 +488,8 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
         <div className="dc-status-row"><div className="dc-led dc-led-r"/><span>LOCKED</span></div>
       </div>
 
-      {/* Decoy B — small LCD display, upper centre-left */}
-      <div className="rm-decoy dc-b" onClick={() => clickDecoy('b')}>
+      {/* Decoy B — small LCD display */}
+      <div className="rm-decoy dc-b" style={layout.b} onClick={() => clickDecoy('b')}>
         {decoyFlash === 'b' && <div className="dc-denied">⚠ OFFLINE</div>}
         <div className="dc-lcd">
           <div className="dc-lcd-row">SYS·ID  :: 04-C</div>
@@ -464,8 +504,8 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
         </div>
       </div>
 
-      {/* Decoy C — ventilation/HVAC panel, right wall upper */}
-      <div className="rm-decoy dc-c" onClick={() => clickDecoy('c')}>
+      {/* Decoy C — ventilation/HVAC panel */}
+      <div className="rm-decoy dc-c" style={layout.c} onClick={() => clickDecoy('c')}>
         {decoyFlash === 'c' && <div className="dc-denied">⚠ OFFLINE</div>}
         <div className="dc-title">HVAC·CTRL</div>
         <div className="dc-dial-row">
@@ -479,8 +519,8 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
         </div>
       </div>
 
-      {/* Decoy D — comms/intercom panel, left lower */}
-      <div className="rm-decoy dc-d" onClick={() => clickDecoy('d')}>
+      {/* Decoy D — comms/intercom panel */}
+      <div className="rm-decoy dc-d" style={layout.d} onClick={() => clickDecoy('d')}>
         {decoyFlash === 'd' && <div className="dc-denied">⚠ OFFLINE</div>}
         <div className="dc-title">COMM·SYS</div>
         <div className="dc-freq">142.650 MHz</div>
@@ -492,8 +532,8 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
         <div className="dc-status-row"><div className="dc-led dc-led-y"/><span>STANDBY</span></div>
       </div>
 
-      {/* Decoy E — sub-breaker panel, centre wall */}
-      <div className="rm-decoy dc-e" onClick={() => clickDecoy('e')}>
+      {/* Decoy E — sub-breaker panel */}
+      <div className="rm-decoy dc-e" style={layout.e} onClick={() => clickDecoy('e')}>
         {decoyFlash === 'e' && <div className="dc-denied">⚠ OFFLINE</div>}
         <div className="dc-title">SUB·DIST B</div>
         <div className="dc-switches">
@@ -505,8 +545,8 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
         </div>
       </div>
 
-      {/* Decoy F — data terminal, right lower */}
-      <div className="rm-decoy dc-f" onClick={() => clickDecoy('f')}>
+      {/* Decoy F — data terminal */}
+      <div className="rm-decoy dc-f" style={layout.f} onClick={() => clickDecoy('f')}>
         {decoyFlash === 'f' && <div className="dc-denied">⚠ OFFLINE</div>}
         <div className="dc-lcd">
           <div className="dc-lcd-row">NODE·B :: TIMEOUT</div>
@@ -516,8 +556,8 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
         <div className="dc-status-row"><div className="dc-led dc-led-r"/><span>ERROR</span></div>
       </div>
 
-      {/* Decoy G — access control panel, far right */}
-      <div className="rm-decoy dc-g" onClick={() => clickDecoy('g')}>
+      {/* Decoy G — access control panel */}
+      <div className="rm-decoy dc-g" style={layout.g} onClick={() => clickDecoy('g')}>
         {decoyFlash === 'g' && <div className="dc-denied">⚠ OFFLINE</div>}
         <div className="dc-title">ZONE·ACCESS</div>
         <div className="dc-zones">
@@ -533,8 +573,8 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
 
       {/* ─── EXTRA DECOY PANELS ─── */}
 
-      {/* Decoy H — wide map display, top-left */}
-      <div className="rm-decoy dc-h" onClick={() => clickDecoy('h')}>
+      {/* Decoy H — wide map display */}
+      <div className="rm-decoy dc-h" style={layout.h} onClick={() => clickDecoy('h')}>
         {decoyFlash === 'h' && <div className="dc-denied">⚠ OFFLINE</div>}
         <div className="dc-title">DISTRICT·MAP</div>
         <div className="dc-bigmap">
@@ -548,8 +588,8 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
         </div>
       </div>
 
-      {/* Decoy I — tall status column, left mid */}
-      <div className="rm-decoy dc-i" onClick={() => clickDecoy('i')}>
+      {/* Decoy I — tall status column */}
+      <div className="rm-decoy dc-i" style={layout.i} onClick={() => clickDecoy('i')}>
         {decoyFlash === 'i' && <div className="dc-denied">⚠ OFFLINE</div>}
         <div className="dc-title">NODE·STATUS</div>
         {['SRV-01','SRV-02','SRV-03','SRV-04','SRV-05','SRV-06'].map((n,i)=>(
@@ -561,8 +601,8 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
         ))}
       </div>
 
-      {/* Decoy J — wide waveform monitor, top centre-right */}
-      <div className="rm-decoy dc-j" onClick={() => clickDecoy('j')}>
+      {/* Decoy J — wide waveform monitor */}
+      <div className="rm-decoy dc-j" style={layout.j} onClick={() => clickDecoy('j')}>
         {decoyFlash === 'j' && <div className="dc-denied">⚠ OFFLINE</div>}
         <div className="dc-title">SIGNAL·MONITOR</div>
         <div className="dc-waveform">
@@ -578,8 +618,8 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
         </div>
       </div>
 
-      {/* Decoy K — wide log terminal, bottom-left */}
-      <div className="rm-decoy dc-k" onClick={() => clickDecoy('k')}>
+      {/* Decoy K — wide log terminal */}
+      <div className="rm-decoy dc-k" style={layout.k} onClick={() => clickDecoy('k')}>
         {decoyFlash === 'k' && <div className="dc-denied">⚠ OFFLINE</div>}
         <div className="dc-title">SYSTEM·LOG</div>
         <div className="dc-logbox">
@@ -595,8 +635,8 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
         </div>
       </div>
 
-      {/* Decoy L — wide power graph, bottom centre */}
-      <div className="rm-decoy dc-l" onClick={() => clickDecoy('l')}>
+      {/* Decoy L — wide power graph */}
+      <div className="rm-decoy dc-l" style={layout.l} onClick={() => clickDecoy('l')}>
         {decoyFlash === 'l' && <div className="dc-denied">⚠ OFFLINE</div>}
         <div className="dc-title">POWER·GRID</div>
         <div className="dc-powergraph">
@@ -609,8 +649,8 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
         </div>
       </div>
 
-      {/* Decoy M — camera feeds, bottom-right */}
-      <div className="rm-decoy dc-m" onClick={() => clickDecoy('m')}>
+      {/* Decoy M — camera feeds */}
+      <div className="rm-decoy dc-m" style={layout.m} onClick={() => clickDecoy('m')}>
         {decoyFlash === 'm' && <div className="dc-denied">⚠ OFFLINE</div>}
         <div className="dc-title">CCTV·FEEDS</div>
         <div className="dc-cams">
@@ -623,8 +663,8 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
         </div>
       </div>
 
-      {/* Decoy N — network topology, right upper-mid */}
-      <div className="rm-decoy dc-n" onClick={() => clickDecoy('n')}>
+      {/* Decoy N — network topology */}
+      <div className="rm-decoy dc-n" style={layout.n} onClick={() => clickDecoy('n')}>
         {decoyFlash === 'n' && <div className="dc-denied">⚠ OFFLINE</div>}
         <div className="dc-title">NET·TOPOLOGY</div>
         <svg className="dc-topo-svg" viewBox="0 0 100 60">
@@ -639,8 +679,8 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
         <div className="dc-status-row"><div className="dc-led dc-led-r"/><span>2 NODES DOWN</span></div>
       </div>
 
-      {/* Decoy O — thermal readout, mid-centre */}
-      <div className="rm-decoy dc-o" onClick={() => clickDecoy('o')}>
+      {/* Decoy O — thermal readout */}
+      <div className="rm-decoy dc-o" style={layout.o} onClick={() => clickDecoy('o')}>
         {decoyFlash === 'o' && <div className="dc-denied">⚠ OFFLINE</div>}
         <div className="dc-title">THERMAL·MAP</div>
         <div className="dc-thermal">
@@ -653,8 +693,8 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
         <div className="dc-status-row"><div className="dc-led dc-led-r"/><span>OVERHEAT ZONE 3</span></div>
       </div>
 
-      {/* Decoy P — wide alert console, bottom far-right */}
-      <div className="rm-decoy dc-p" onClick={() => clickDecoy('p')}>
+      {/* Decoy P — wide alert console */}
+      <div className="rm-decoy dc-p" style={layout.p} onClick={() => clickDecoy('p')}>
         {decoyFlash === 'p' && <div className="dc-denied">⚠ OFFLINE</div>}
         <div className="dc-title">ALERT·CONSOLE</div>
         {[
