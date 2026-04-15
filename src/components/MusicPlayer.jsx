@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 
 const TRACKS = [
-  { name: 'TECHNO',  bpm: 130 },
-  { name: 'CYBER',   bpm: 145 },
-  { name: 'PULSE',   bpm: 120 },
+  { name: 'TECHNO',  bpm: 110 },
+  { name: 'CYBER',   bpm: 120 },
+  { name: 'PULSE',   bpm: 100 },
 ]
 
 /* ══════════════════════════════════════════════
