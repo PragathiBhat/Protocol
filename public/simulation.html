@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { overflow:hidden; background:#000; font-family:'Courier New',monospace; }
+#mount { position:fixed; inset:0; }
+canvas { display:block; width:100% !important; height:100% !important; }
+
+#hud {
+  position:fixed; top:16px; left:16px; z-index:10;
+  color:#fff; font-size:10px; letter-spacing:1.5px;
+  pointer-events:none;
+  background:rgba(0,0,0,.6); padding:12px 16px;
+  border:1px solid rgba(255,255,255,.12); min-width:190px;
+}
+#hud .world-name { font-size:13px; font-weight:bold; letter-spacing:3px; margin-bottom:10px; }
+#hud .t-row { display:flex; justify-content:space-between; gap:16px; margin-bottom:3px; opacity:.6; }
+#hud .t-row.hot { opacity:1; color:#ffaa00; }
+#hud .controls { margin-top:10px; font-size:9px; color:rgba(255,255,255,.35); letter-spacing:1px; line-height:2; border-top:1px solid rgba(255,255,255,.1); padding-top:8px; }
+
+#exit-btn {
+  position:fixed; top:16px; right:16px; z-index:10;
+  background:transparent; border:1px solid rgba(255,255,255,.35);
+  color:rgba(255,255,255,.65); font-family:'Courier New',monospace;
+  font-size:10px; letter-spacing:2px; padding:8px 16px; cursor:pointer; transition:all .2s;
+}
+#exit-btn:hover { border-color:#fff; color:#fff; }
+
+#prompt {
+  position:fixed; inset:0; z-index:5; display:flex;
+  align-items:center; justify-content:center;
+  background:rgba(0,0,0,.65); cursor:pointer;
+  font-size:12px; letter-spacing:5px; color:rgba(255,255,255,.8);
+}
+
+#vignette {
+  position:fixed; inset:0; pointer-events:none; z-index:3; display:none;
+  background:radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,.75) 100%);
+}
+</style>
+</head>
+<body>
+<div id="mount"></div>
+
+<div id="hud">
+  <div class="world-name" id="wname"></div>
+  <div id="tlist"></div>
+  <div class="controls">W A S D — MOVE<br>MOUSE — LOOK<br>CLICK — LOCK CURSOR</div>
+</div>
+
+<div id="vignette"></div>
+<button id="exit-btn">EXIT SIMULATION</button>
+<div id="prompt">CLICK TO BEGIN</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ══════════════════════════════════════════════
+   PARSE TIMES FROM URL  (ms → s)
+══════════════════════════════════════════════ */
+const p = new URLSearchParams(location.search);
+const times = {
+  people:         Math.round((+p.get('people')         || 0) / 1000),
+  environment:    Math.round((+p.get('environment')    || 0) / 1000),
+  economy:        Math.round((+p.get('economy')        || 0) / 1000),
+  infrastructure: Math.round((+p.get('infrastructure') || 0) / 1000),
+  memory:         Math.round((+p.get('memory')         || 0) / 1000),
+};
+const slowest = Object.entries(times).sort((a,b)=>b[1]-a[1])[0][0];
+
+/* HUD */
+document.getElementById('wname').textContent = slowest.toUpperCase() + ' WORLD';
+const tlist = document.getElementById('tlist');
+for (const [k,v] of Object.entries(times)) {
+  const d = document.createElement('div');
+  d.className = 't-row' + (k===slowest ? ' hot' : '');
+  d.innerHTML = `<span>${k.toUpperCase()}</span><span>${v}s</span>`;
+  tlist.appendChild(d);
+}
+
+/* ══════════════════════════════════════════════
+   THREE.JS SCENE
+══════════════════════════════════════════════ */
+const scene    = new THREE.Scene();
+const camera   = new THREE.PerspectiveCamera(72, innerWidth/innerHeight, 0.1, 600);
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(devicePixelRatio);
+renderer.setSize(innerWidth, innerHeight);
+document.getElementById('mount').appendChild(renderer.domElement);
+camera.position.set(0, 1.7, 22);
+
+/* Lighting */
+const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambient);
+const sun = new THREE.DirectionalLight(0xffffff, 0.85);
+sun.position.set(40, 60, 30);
+scene.add(sun);
+
+/* Ground */
+const groundMesh = new THREE.Mesh(
+  new THREE.PlaneGeometry(200, 200),
+  new THREE.MeshLambertMaterial({ color:0x888888 })
+);
+groundMesh.rotation.x = -Math.PI/2;
+scene.add(groundMesh);
+
+/* ── Shared builders ── */
+function tvTower() {
+  const g = new THREE.Group();
+  g.add(Object.assign(new THREE.Mesh(
+    new THREE.CylinderGeometry(0.45,0.55,60,8),
+    new THREE.MeshLambertMaterial({color:0xaaaaaa})),
+    {position: new THREE.Vector3(0,30,0)}
+  ));
+  const ball = new THREE.Mesh(
+    new THREE.SphereGeometry(2.8,14,10),
+    new THREE.MeshLambertMaterial({color:0xcccccc})
+  );
+  ball.position.y = 62;
+  g.add(ball);
+  g.position.set(0,0,-4);
+  return g;
+}
+
+function worldClock() {
+  const g = new THREE.Group();
+  g.add(new THREE.Mesh(
+    new THREE.CylinderGeometry(1.2,1.2,0.4,12),
+    new THREE.MeshLambertMaterial({color:0x999999})
+  ));
+  const disc = new THREE.Mesh(
+    new THREE.CylinderGeometry(1,1,1.6,16),
+    new THREE.MeshLambertMaterial({color:0xaaaacc})
+  );
+  disc.position.y = 1.0;
+  g.add(disc);
+  g.position.set(6,0,2);
+  return g;
+}
+
+function ringBuildings(opts={}) {
+  const g = new THREE.Group();
+  const N=16, R=46;
+  for (let i=0;i<N;i++) {
+    const a = (i/N)*Math.PI*2;
+    let h = opts.h || (9+Math.random()*18);
+    if (opts.crumbled) h *= 0.25+Math.random()*0.75;
+    const w=6+Math.random()*5, d=6+Math.random()*5;
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(w,h,d),
+      new THREE.MeshLambertMaterial({color: opts.color||0x334455})
+    );
+    mesh.position.set(Math.cos(a)*R, h/2, Math.sin(a)*R);
+    g.add(mesh);
+  }
+  return g;
+}
+
+/* NPC factory */
+function makeNPC(opts={}) {
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.3,0.3,1.6,7),
+    new THREE.MeshLambertMaterial({color:opts.color||0x556677})
+  );
+  if (opts.hunched) body.scale.y = 0.6;
+  g.add(body);
+  const head = new THREE.Mesh(
+    new THREE.SphereGeometry(0.3,8,6),
+    new THREE.MeshLambertMaterial({color:0xcc9977})
+  );
+  head.position.y = opts.hunched ? 0.75 : 1.1;
+  g.add(head);
+  g.position.set((Math.random()-.5)*60, opts.hunched?0.48:0.8, (Math.random()-.5)*60);
+  g.userData = {
+    target: new THREE.Vector3((Math.random()-.5)*70,0,(Math.random()-.5)*70),
+    speed: opts.speed||0.035,
+    timer: 0,
+    retarget: opts.retarget||0,
+  };
+  return g;
+}
+
+function stepNPC(npc) {
+  const {target, speed, retarget} = npc.userData;
+  if (retarget>0) {
+    npc.userData.timer++;
+    if (npc.userData.timer >= retarget) {
+      npc.userData.timer = 0;
+      target.set((Math.random()-.5)*70,0,(Math.random()-.5)*70);
+    }
+  }
+  const dx=target.x-npc.position.x, dz=target.z-npc.position.z;
+  const dist=Math.sqrt(dx*dx+dz*dz);
+  if (dist<0.6) {
+    target.set((Math.random()-.5)*70,0,(Math.random()-.5)*70);
+  } else {
+    npc.position.x += (dx/dist)*speed;
+    npc.position.z += (dz/dist)*speed;
+    npc.rotation.y  = Math.atan2(dx/dist, dz/dist);
+  }
+}
+
+/* ══════════════════════════════════════════════
+   5 WORLDS
+══════════════════════════════════════════════ */
+const animated = [], npcs = [];
+
+function buildPeople() {
+  scene.background = new THREE.Color(0x1a1a2e);
+  scene.fog = new THREE.Fog(0x3a3a55, 8, 45);
+  ambient.intensity = 0.3; sun.intensity = 0.15;
+  scene.add(tvTower());
+  scene.add(worldClock());
+  scene.add(ringBuildings({color:0x1e1e33}));
+  for (let i=0;i<5;i++) {
+    const lit = new THREE.Mesh(
+      new THREE.BoxGeometry(0.35,0.04,0.18),
+      new THREE.MeshLambertMaterial({color:0x2a2a2a})
+    );
+    lit.position.set((Math.random()-.5)*28, 0.02, (Math.random()-.5)*28);
+    lit.userData.dx=(Math.random()-.5)*0.003;
+    lit.userData.dz=(Math.random()-.5)*0.003;
+    animated.push(lit); scene.add(lit);
+  }
+}
+
+function buildEnvironment() {
+  scene.background = new THREE.Color(0x5a5a22);
+  scene.fog = new THREE.FogExp2(0x7a7a30, 0.04);
+  scene.add(tvTower());
+  scene.add(worldClock());
+  scene.add(ringBuildings({color:0x464630}));
+  for (let i=0;i<12;i++) {
+    const trunk = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.1,0.12,3,5),
+      new THREE.MeshLambertMaterial({color:0x4a3322})
+    );
+    trunk.position.set((Math.random()-.5)*55,1.5,(Math.random()-.5)*55);
+    scene.add(trunk);
+  }
+  for (let i=0;i<30;i++) {
+    const sp = new THREE.Mesh(
+      new THREE.SphereGeometry(0.06,4,4),
+      new THREE.MeshBasicMaterial({color:0x3a3a10})
+    );
+    sp.position.set((Math.random()-.5)*55, Math.random()*14, (Math.random()-.5)*55);
+    sp.userData.fall = 0.01+Math.random()*0.018;
+    animated.push(sp); scene.add(sp);
+  }
+  for (let i=0;i<12;i++) {
+    const n=makeNPC({hunched:true,speed:0.02,color:0x555535});
+    npcs.push(n); scene.add(n);
+  }
+}
+
+function buildEconomy() {
+  scene.background = new THREE.Color(0xb06818);
+  sun.color.set(0xffaa44); sun.intensity = 1.1;
+  scene.add(tvTower());
+  scene.add(worldClock());
+  scene.add(ringBuildings({color:0x7a4a00}));
+  for (let i=0;i<40;i++) {
+    const note = new THREE.Mesh(
+      new THREE.BoxGeometry(0.4,0.01,0.2),
+      new THREE.MeshLambertMaterial({color:0x22551a})
+    );
+    note.position.set((Math.random()-.5)*70, Math.random()*25, (Math.random()-.5)*70);
+    note.userData.fall = 0.04+Math.random()*0.06;
+    note.userData.spin = 0.02+Math.random()*0.04;
+    animated.push(note); scene.add(note);
+  }
+  const labels = ['Bread: 4,000,000€','Coffee: 9,000,000€','Rent: 40,000,000€','Water: 2,000,000€'];
+  labels.forEach((txt,i) => {
+    const cv = document.createElement('canvas');
+    cv.width=256; cv.height=64;
+    const cx=cv.getContext('2d');
+    cx.fillStyle='#1a0800'; cx.fillRect(0,0,256,64);
+    cx.fillStyle='#ffaa00'; cx.font='bold 17px monospace';
+    cx.fillText(txt,8,40);
+    const sign = new THREE.Mesh(
+      new THREE.PlaneGeometry(4,1),
+      new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),side:THREE.DoubleSide})
+    );
+    const a=(i/4)*Math.PI*2;
+    sign.position.set(Math.cos(a)*18,2.2,Math.sin(a)*18);
+    sign.rotation.y=-a;
+    scene.add(sign);
+  });
+  for (let i=0;i<12;i++) {
+    const n=makeNPC({speed:0.08,color:0x7a5500,retarget:120});
+    npcs.push(n); scene.add(n);
+  }
+}
+
+function buildInfrastructure() {
+  scene.background = new THREE.Color(0x2e2018);
+  scene.fog = new THREE.Fog(0x2e2018, 18, 90);
+  scene.add(tvTower());
+  scene.add(ringBuildings({color:0x3e2e18, crumbled:true}));
+  const carA = new THREE.Mesh(
+    new THREE.BoxGeometry(2,0.8,4),
+    new THREE.MeshLambertMaterial({color:0x882222})
+  );
+  const carB = new THREE.Mesh(
+    new THREE.BoxGeometry(2,0.8,4),
+    new THREE.MeshLambertMaterial({color:0x224488})
+  );
+  carA.position.set(-22,0.4,4); carB.position.set(22,0.4,4);
+  carA.userData.dir=1; carB.userData.dir=-1;
+  animated.push(carA,carB); scene.add(carA,carB);
+  const pts=[];
+  for (let i=0;i<24;i++) {
+    const sx=(Math.random()-.5)*55, sz=(Math.random()-.5)*55;
+    for (let j=0;j<4;j++) {
+      pts.push(sx+(Math.random()-.5)*4, 0.01, sz+(Math.random()-.5)*4,
+               sx+(Math.random()-.5)*4, 0.01, sz+(Math.random()-.5)*4);
+    }
+  }
+  const cg=new THREE.BufferGeometry();
+  cg.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
+  scene.add(new THREE.LineSegments(cg,new THREE.LineBasicMaterial({color:0x111100})));
+  for (let i=0;i<8;i++) {
+    const b=new THREE.Mesh(
+      new THREE.BoxGeometry(0.3,0.9,0.3),
+      new THREE.MeshLambertMaterial({color:0xff6600})
+    );
+    b.position.set((Math.random()-.5)*28,0.45,(Math.random()-.5)*28);
+    scene.add(b);
+  }
+}
+
+function buildMemory() {
+  scene.background = new THREE.Color(0xeeeeee);
+  ambient.intensity = 0.9; sun.color.set(0xffffff); sun.intensity = 0.8;
+  groundMesh.material.color.set(0xcccccc);
+  const sp=14;
+  for (let r=-2;r<=2;r++) for (let c=-2;c<=2;c++) {
+    if (r===0&&c===0) continue;
+    const m=new THREE.Mesh(
+      new THREE.BoxGeometry(4,8,4),
+      new THREE.MeshLambertMaterial({color:0x888888})
+    );
+    m.position.set(c*sp,4,r*sp);
+    scene.add(m);
+  }
+  for (let i=0;i<10;i++) {
+    const n=makeNPC({speed:0.02,color:0x999999});
+    npcs.push(n); scene.add(n);
+  }
+  document.getElementById('vignette').style.display='block';
+}
+
+switch(slowest) {
+  case 'people':         buildPeople();         break;
+  case 'environment':    buildEnvironment();    break;
+  case 'economy':        buildEconomy();        break;
+  case 'infrastructure': buildInfrastructure(); break;
+  case 'memory':         buildMemory();         break;
+  default:               buildPeople();
+}
+
+/* ══════════════════════════════════════════════
+   POINTER LOCK + CONTROLS
+══════════════════════════════════════════════ */
+const canvas = renderer.domElement;
+const prompt = document.getElementById('prompt');
+let locked = false;
+canvas.addEventListener('click', () => canvas.requestPointerLock());
+document.addEventListener('pointerlockchange', () => {
+  locked = document.pointerLockElement === canvas;
+  prompt.style.display = locked ? 'none' : 'flex';
+});
+
+let yaw=0, pitch=0;
+document.addEventListener('mousemove', e => {
+  if (!locked) return;
+  yaw   -= e.movementX * 0.0022;
+  pitch -= e.movementY * 0.0022;
+  pitch  = Math.max(-1.4, Math.min(1.4, pitch));
+});
+
+const keys={};
+document.addEventListener('keydown', e=>{ keys[e.code]=true; e.preventDefault(); });
+document.addEventListener('keyup',   e=>{ keys[e.code]=false; });
+
+/* ══════════════════════════════════════════════
+   LOOP
+══════════════════════════════════════════════ */
+let raf;
+const fwd   = new THREE.Vector3();
+const right = new THREE.Vector3();
+
+function loop() {
+  raf = requestAnimationFrame(loop);
+  const spd = 0.13;
+  fwd.set(-Math.sin(yaw),0,-Math.cos(yaw));
+  right.set(Math.cos(yaw),0,-Math.sin(yaw));
+  if (keys['KeyW']||keys['ArrowUp'])    camera.position.addScaledVector(fwd,   spd);
+  if (keys['KeyS']||keys['ArrowDown'])  camera.position.addScaledVector(fwd,  -spd);
+  if (keys['KeyA']||keys['ArrowLeft'])  camera.position.addScaledVector(right, -spd);
+  if (keys['KeyD']||keys['ArrowRight']) camera.position.addScaledVector(right,  spd);
+  camera.position.y = 1.7;
+  camera.rotation.order='YXZ';
+  camera.rotation.y=yaw;
+  camera.rotation.x=pitch;
+
+  for (const o of animated) {
+    if (o.userData.dx!==undefined) {          // litter
+      o.position.x+=o.userData.dx; o.position.z+=o.userData.dz;
+      if (Math.abs(o.position.x)>30) o.userData.dx*=-1;
+      if (Math.abs(o.position.z)>30) o.userData.dz*=-1;
+    } else if (o.userData.fall!==undefined && o.userData.spin===undefined) { // particles
+      o.position.y-=o.userData.fall;
+      if (o.position.y<0) o.position.y=14;
+    } else if (o.userData.spin!==undefined) { // banknotes
+      o.position.y-=o.userData.fall; o.rotation.y+=o.userData.spin;
+      if (o.position.y<0) o.position.y=25;
+    } else if (o.userData.dir!==undefined) {  // cars
+      o.position.x+=o.userData.dir*0.1;
+      if (o.position.x> 22) o.userData.dir=-1;
+      if (o.position.x<-22) o.userData.dir= 1;
+    }
+  }
+  for (const n of npcs) stepNPC(n);
+
+  renderer.render(scene, camera);
+}
+loop();
+
+window.addEventListener('resize', () => {
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+
+document.getElementById('exit-btn').addEventListener('click', () => {
+  cancelAnimationFrame(raf);
+  window.parent.postMessage('simulation-exit','*');
+});
+</script>
+</body>
+</html>

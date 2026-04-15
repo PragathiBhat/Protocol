@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#020810;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:8px 0 6px;
+    font-family:'Courier New', monospace;
+    user-select:none;
+  }
+  canvas { display:block; cursor:crosshair; }
+  #hint {
+    margin-top:8px;
+    font-size:10px;
+    letter-spacing:2px;
+    color:rgba(0,212,255,.45);
+  }
+  #msg {
+    margin-top:8px;
+    font-size:15px;
+    letter-spacing:4px;
+    color:#00ff88;
+    text-shadow:0 0 18px rgba(0,255,136,.9);
+    display:none;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hint">HOLD &amp; DRAG TO NAVIGATE</div>
+<div id="msg">▶ YOU ESCAPED ◀</div>
+
+<script>
+/* ─── CONFIG ─── */
+const COLS = 15, ROWS = 15, CS = 28;
+const LERP = 0.28;        // smoothing factor per frame (higher = snappier)
+const TRAIL_LEN = 14;     // how many past positions to keep for the tail
+
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+canvas.width  = COLS * CS;
+canvas.height = ROWS * CS;
+
+/* ─── GRID ─── */
+const grid = [];
+for (let r = 0; r < ROWS; r++) {
+  grid[r] = [];
+  for (let c = 0; c < COLS; c++)
+    grid[r][c] = { top:true, right:true, bottom:true, left:true, visited:false };
+}
+
+/* ─── MAZE GENERATION (iterative backtracker) ─── */
+(function generate() {
+  const opp  = { top:'bottom', bottom:'top', left:'right', right:'left' };
+  const dRow = { top:-1, bottom:1,  left:0,  right:0 };
+  const dCol = { top:0,  bottom:0,  left:-1, right:1 };
+  const dirs = ['top','right','bottom','left'];
+  const stack = [{ r:0, c:0 }];
+  grid[0][0].visited = true;
+
+  while (stack.length) {
+    const { r, c } = stack[stack.length - 1];
+    const next = dirs
+      .slice().sort(() => Math.random() - 0.5)
+      .map(d => ({ d, nr: r + dRow[d], nc: c + dCol[d] }))
+      .filter(({ nr, nc }) =>
+        nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && !grid[nr][nc].visited);
+
+    if (!next.length) { stack.pop(); continue; }
+    const { d, nr, nc } = next[0];
+    grid[r][c][d]        = false;
+    grid[nr][nc][opp[d]] = false;
+    grid[nr][nc].visited = true;
+    stack.push({ r:nr, c:nc });
+  }
+})();
+
+/* ─── STATE ─── */
+let player   = { r:0, c:0 };              // logical cell
+let target   = { x:CS/2, y:CS/2 };       // pixel destination
+let visual   = { x:CS/2, y:CS/2 };       // animated pixel position
+const trail  = [];                         // recent visual positions for the comet tail
+let solved   = false;
+let dragging = false;
+
+/* ─── HELPERS ─── */
+function reachable(r, c) {
+  const out = [];
+  if (!grid[r][c].top    && r > 0)      out.push({ r:r-1, c });
+  if (!grid[r][c].bottom && r < ROWS-1) out.push({ r:r+1, c });
+  if (!grid[r][c].left   && c > 0)      out.push({ r, c:c-1 });
+  if (!grid[r][c].right  && c < COLS-1) out.push({ r, c:c+1 });
+  return out;
+}
+
+function screenToCell(e) {
+  const rect = canvas.getBoundingClientRect();
+  const sx = canvas.width  / rect.width;
+  const sy = canvas.height / rect.height;
+  return {
+    cr: Math.floor((e.clientY - rect.top)  * sy / CS),
+    cc: Math.floor((e.clientX - rect.left) * sx / CS),
+  };
+}
+
+function tryMove(cr, cc) {
+  if (solved) return;
+  if (cr < 0 || cr >= ROWS || cc < 0 || cc >= COLS) return;
+  if (cr === player.r && cc === player.c) return;
+
+  const dr = cr - player.r, dc = cc - player.c;
+  if (Math.abs(dr) + Math.abs(dc) !== 1) return;   // must be adjacent
+
+  /* Wall check */
+  if (dr === -1 && grid[player.r][player.c].top)    return;
+  if (dr ===  1 && grid[player.r][player.c].bottom) return;
+  if (dc === -1 && grid[player.r][player.c].left)   return;
+  if (dc ===  1 && grid[player.r][player.c].right)  return;
+
+  /* Legal move — update logical position and pixel target */
+  player = { r:cr, c:cc };
+  target = { x: cc*CS + CS/2, y: cr*CS + CS/2 };
+
+  if (player.r === ROWS-1 && player.c === COLS-1) {
+    solved = true;
+    document.getElementById('hint').style.display = 'none';
+    document.getElementById('msg').style.display  = 'block';
+    window.parent.postMessage('maze-solved', '*');
+  }
+}
+
+/* ─── DRAW ─── */
+function draw() {
+  /* Background */
+  ctx.fillStyle = '#020810';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  /* Cell interiors */
+  ctx.fillStyle = '#0c1e35';
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++)
+      ctx.fillRect(c*CS+1, r*CS+1, CS-2, CS-2);
+
+  /* Reachable highlights */
+  if (!solved) {
+    ctx.fillStyle = 'rgba(255,170,0,.22)';
+    for (const n of reachable(player.r, player.c))
+      ctx.fillRect(n.c*CS+2, n.r*CS+2, CS-4, CS-4);
+  }
+
+  /* START */
+  ctx.fillStyle = 'rgba(0,255,136,.18)';
+  ctx.fillRect(1, 1, CS-2, CS-2);
+
+  /* EXIT */
+  ctx.fillStyle = solved ? 'rgba(0,255,136,.4)' : 'rgba(255,26,138,.22)';
+  ctx.fillRect((COLS-1)*CS+1, (ROWS-1)*CS+1, CS-2, CS-2);
+
+  /* Walls */
+  ctx.strokeStyle = '#00d4ff';
+  ctx.lineWidth   = 1.5;
+  ctx.shadowColor = 'rgba(0,212,255,.5)';
+  ctx.shadowBlur  = 3;
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const x = c*CS, y = r*CS, cell = grid[r][c];
+      ctx.beginPath();
+      if (cell.top)    { ctx.moveTo(x,    y);    ctx.lineTo(x+CS, y);    }
+      if (cell.right)  { ctx.moveTo(x+CS, y);    ctx.lineTo(x+CS, y+CS); }
+      if (cell.bottom) { ctx.moveTo(x,    y+CS); ctx.lineTo(x+CS, y+CS); }
+      if (cell.left)   { ctx.moveTo(x,    y);    ctx.lineTo(x,    y+CS); }
+      ctx.stroke();
+    }
+  }
+  ctx.shadowBlur = 0;
+
+  /* Labels */
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#00ff88';
+  ctx.font = `bold ${Math.floor(CS*.38)}px monospace`;
+  ctx.fillText('S', CS/2, CS/2);
+  ctx.fillStyle = solved ? '#00ff88' : '#ff1a8a';
+  ctx.font = `bold ${Math.floor(CS*.33)}px monospace`;
+  ctx.fillText('EXIT', (COLS-1)*CS+CS/2, (ROWS-1)*CS+CS/2);
+
+  /* ── Comet tail ── */
+  for (let i = 0; i < trail.length; i++) {
+    const t   = i / trail.length;            // 0 = oldest, 1 = newest
+    const alpha = t * 0.45;
+    const r   = CS * 0.3 * t;
+    ctx.beginPath();
+    ctx.arc(trail[i].x, trail[i].y, r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(255,170,0,${alpha})`;
+    ctx.fill();
+  }
+
+  /* ── Player dot ── */
+  ctx.beginPath();
+  ctx.arc(visual.x, visual.y, CS * 0.3, 0, Math.PI*2);
+  ctx.fillStyle   = '#ffaa00';
+  ctx.shadowColor = '#ffaa00';
+  ctx.shadowBlur  = 16;
+  ctx.fill();
+  ctx.shadowBlur  = 0;
+}
+
+/* ─── ANIMATION LOOP ─── */
+function animate() {
+  /* Record position for the tail before moving */
+  trail.push({ x: visual.x, y: visual.y });
+  if (trail.length > TRAIL_LEN) trail.shift();
+
+  /* Smooth lerp toward target */
+  visual.x += (target.x - visual.x) * LERP;
+  visual.y += (target.y - visual.y) * LERP;
+
+  draw();
+  requestAnimationFrame(animate);
+}
+
+/* ─── DRAG EVENTS ─── */
+canvas.addEventListener('mousedown', e => {
+  if (solved) return;
+  dragging = true;
+  canvas.style.cursor = 'grabbing';
+  const { cr, cc } = screenToCell(e);
+  tryMove(cr, cc);
+});
+
+canvas.addEventListener('mousemove', e => {
+  if (!dragging || solved) return;
+  const { cr, cc } = screenToCell(e);
+  tryMove(cr, cc);
+});
+
+function stopDrag() {
+  dragging = false;
+  if (!solved) canvas.style.cursor = 'crosshair';
+}
+canvas.addEventListener('mouseup',    stopDrag);
+canvas.addEventListener('mouseleave', stopDrag);
+
+/* ─── START ─── */
+animate();
+</script>
+</body>
+</html>

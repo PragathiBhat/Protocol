@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create *)",
+      "Bash(cp -r \"D:/MASTERS PROJECTS/SEM 2/Git Hub/escape-alexanderplatz/.\" \"D:/MASTERS PROJECTS/SEM 2/Git Hub/Make or break/\")",
+      "Bash(rm -rf \"D:/MASTERS PROJECTS/SEM 2/Git Hub/escape-alexanderplatz\")",
+      "Bash(npm install *)",
+      "Bash(mkdir -p \"D:/MASTERS PROJECTS/SEM 2/Git Hub/Make or break/src/components/stations\")",
+      "Bash(mkdir -p \"D:/MASTERS PROJECTS/SEM 2/Git Hub/Make or break/.github/workflows\")",
+      "Bash(npm run *)",
+      "Bash(netstat -ano)"
+    ]
+  }
+}
