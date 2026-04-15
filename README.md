@@ -1,80 +1,121 @@
 # PROTOCOL
 
-A browser-based interactive escape room game set inside a control room that manages a city producing more data than can be interpreted.
-
-You are the operator. Configure 5 city systems to unlock the exit — then see the city you created.
-
-## How to play
-
-1. You are placed inside a control room with 5 stations
-2. Click each station to open its control panel
-3. Interact with each system:
-   - **People** — set population density with a slider
-   - **Memory** — choose how the city handles its past
-   - **Environment** — drag elements to balance nature vs. urban
-   - **Economy** — toggle economic activity on and off
-   - **Infrastructure** — connect city systems by clicking nodes
-4. Once all 5 stations are configured, the EXIT DOOR unlocks
-5. Enter the exit to see your city — shaped entirely by your choices
-
-There is no correct answer.
+A browser-based escape room where you configure five city control systems to determine the fate of Alexanderplatz.
 
 ---
 
-## Local setup
+## Author & course
+
+**Author:** Pragathi Bhat Prakash  
+**Studio:** Prompt City — Urban Vision Wolfsburg 2026  
+**Course:** IUDD Master, SoSe 2026  
+**Chair:** Informatics in Architecture and Urbanism (InfAU), Faculty of Architecture and Urbanism, Bauhaus-Universität Weimar  
+**Teaching staff:** Reinhard König, Martin Bielik, Sven Schneider, Egor Gaydukov, Egor Gavrilov  
+**Exercise:** Urban Absurdities (Nonsense Project)  
+**Submission date:** 2026-04-16
+
+---
+
+## Links
+
+- **Live app (GitHub Pages):** https://pragathibhat.github.io/Protocol/
+- **Source repo:** https://github.com/PragathiBhat/Protocol
+- **Miro frame:** https://miro.com/app/board/uXjVGCtKivA=/?moveToWidget=[your-frame-id]
+- **60 s showreel:** embedded on the Miro frame above
+
+---
+
+## The task
+
+Nonsense Project is a two-weeks long task designed to get familiar with application of coding agents in building apps, tools and projects that investigate unique ways of working with urban context. I was randomly assigned one urban paradox and one constraint from the studio's Nonsense Ideas deck and built a working web app that answers this combination. The process is documented here and in a 60-second showreel.
+
+---
+
+## Theme & constraint
+
+**Theme (Urban Absurdity):**  
+[Paste the theme exactly as drawn.]
+
+**Constraint (Playful Limitation):**  
+[Paste the constraint exactly as drawn.]
+
+---
+
+## Concept and User Story
+
+**Concept** (100–150 words, non-technical). What the app is, how it reads the theme, where the constraint actually bites.
+
+[Your concept goes here.]
+
+---
+
+**User story** (100–200 words):
+
+[Your user story goes here.]
+
+---
+
+## How to use it
+
+1. Open the live app — an animated terminal loads over a 3D map of Berlin; Alexanderplatz pulses on screen.
+2. Click **ENTER CONTROL ROOM** to step inside the operator station.
+3. The room is filled with panels — most are decoys. Explore by clicking each one to find the 5 active control systems. Wrong panels flash **⚠ OFFLINE**.
+4. Use **◎ SCAN ROOM** (top-right HUD) if you get stuck — it highlights the real stations briefly.
+5. Click a real station to open its puzzle panel. A timer starts counting in the corner.
+6. Complete all 5 stations (People, Memory, Environment, Economy, Infrastructure).
+7. Once all are configured, the **EXIT** ladder at the right of the room lights up.
+8. Click EXIT to enter the city simulation and see the world shaped by your choices.
+
+> **Note:** Every time you reload, the panels rearrange — no two sessions look the same.
+
+---
+
+## Technical implementation
+
+**Frontend:** React + Vite, JavaScript (no TypeScript)  
+**Hosting & build:** GitHub Pages, built via GitHub Actions workflow (`.github/workflows/deploy.yml`) on every push to `main`  
+**Data sources / APIs:** OpenStreetMap vector tiles via [OpenFreeMap](https://openfreemap.org/) (liberty style) — loaded at runtime for the intro map  
+**Models at runtime:** None  
+**Notable libraries:** Three.js (5 city simulations), MapLibre GL JS (intro OSM map), React
+
+**Run locally:**
 
 ```bash
 # Install dependencies
 npm install
 
-# Start the development server
+# Start the development server (runs at http://localhost:5173)
 npm run dev
 
 # Build for production
 npm run build
 ```
 
-The dev server runs at `http://localhost:5173` (or next available port).
+---
+
+## Working with AI
+
+**Coding agents used:** Claude Code  
+**Model:** claude-sonnet-4-6
+
+**Key prompts (2–5 that actually moved the project):**
+
+> [Quote prompt 1]
+
+> [Quote prompt 2]
+
+> [Quote prompt 3]
+
+**Reflection** (≤ 150 words): What unlocked progress? Where did the agent get stuck or go sideways? What is one thing you would do differently next time?
+
+[Your reflection goes here.]
 
 ---
 
-## Deployment (GitHub Pages)
+## Credits, assets, licenses
 
-This project auto-deploys to GitHub Pages on every push to `main`.
-
-**One-time setup:**
-1. Go to your repo → Settings → Pages
-2. Set **Source** to `GitHub Actions`
-3. Push to `main` — the workflow handles the rest
-
-Your game will be live at `https://<your-username>.github.io/<repo-name>/`
-
----
-
-## Tech stack
-
-- [Vite](https://vite.dev/) — build tool & dev server
-- [React](https://react.dev/) — UI framework
-- [react-icons](https://react-icons.github.io/react-icons/) — icons
-- No backend, no database, no external API
-
----
-
-## Project structure
-
-```
-src/
-  App.jsx                    # Game state machine (intro → room → city)
-  App.css                    # All visual styles
-  components/
-    IntroScreen.jsx           # Terminal-style opening sequence
-    MainRoom.jsx              # Control room with 5 station panels
-    StationModal.jsx          # Modal wrapper for station panels
-    CityScreen.jsx            # Procedural city visualization
-    stations/
-      Station1People.jsx      # Slider — population density
-      Station2Memory.jsx      # Buttons — archive protocol
-      Station3Environment.jsx # Drag-and-drop — ecological balance
-      Station4Economy.jsx     # Toggle grid — commercial density
-      Station5Infrastructure.jsx  # Node puzzle — system connectivity
-```
+**Fonts:** Space Mono (Google Fonts, OFL), Orbitron (Google Fonts, OFL)  
+**Data:** OpenStreetMap contributors, ODbL — accessed via OpenFreeMap tiles  
+**Images / sounds:** None  
+**Third-party code:** Three.js (MIT), MapLibre GL JS (BSD-3-Clause), React (MIT), Vite (MIT)  
+**This repo:** MIT
