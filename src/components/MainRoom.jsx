@@ -531,6 +531,145 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
         </div>
       </div>
 
+      {/* ─── EXTRA DECOY PANELS ─── */}
+
+      {/* Decoy H — wide map display, top-left */}
+      <div className="rm-decoy dc-h" onClick={() => clickDecoy('h')}>
+        {decoyFlash === 'h' && <div className="dc-denied">⚠ OFFLINE</div>}
+        <div className="dc-title">DISTRICT·MAP</div>
+        <div className="dc-bigmap">
+          <div className="dc-grid-lines"/>
+          {[[15,30],[40,55],[62,20],[78,68],[25,72],[50,40],[85,35]].map(([x,y],i)=>(
+            <div key={i} className="dc-map-node" style={{left:`${x}%`,top:`${y}%`,animationDelay:`${i*0.5}s`}}/>
+          ))}
+          {['A-3','B-7','C-1'].map((lbl,i)=>(
+            <div key={i} className="dc-map-label" style={{left:`${15+i*32}%`,top:'82%'}}>{lbl}</div>
+          ))}
+        </div>
+      </div>
+
+      {/* Decoy I — tall status column, left mid */}
+      <div className="rm-decoy dc-i" onClick={() => clickDecoy('i')}>
+        {decoyFlash === 'i' && <div className="dc-denied">⚠ OFFLINE</div>}
+        <div className="dc-title">NODE·STATUS</div>
+        {['SRV-01','SRV-02','SRV-03','SRV-04','SRV-05','SRV-06'].map((n,i)=>(
+          <div key={i} className="dc-node-row">
+            <div className={`dc-led ${[0,2,4].includes(i)?'dc-led-g':'dc-led-r'}`}/>
+            <span>{n}</span>
+            <span className="dc-node-val">{[0,2,4].includes(i)?'OK':'ERR'}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Decoy J — wide waveform monitor, top centre-right */}
+      <div className="rm-decoy dc-j" onClick={() => clickDecoy('j')}>
+        {decoyFlash === 'j' && <div className="dc-denied">⚠ OFFLINE</div>}
+        <div className="dc-title">SIGNAL·MONITOR</div>
+        <div className="dc-waveform">
+          {Array.from({length:32}).map((_,i)=>(
+            <div key={i} className="dc-wf-bar" style={{
+              height:`${14+Math.abs(Math.sin(i*0.45+1)*22)}px`,
+              animationDelay:`${i*0.06}s`
+            }}/>
+          ))}
+        </div>
+        <div className="dc-wave-footer">
+          <span>FREQ: 2.4 GHz</span><span>SNR: –12 dB</span><span>BW: 40 MHz</span>
+        </div>
+      </div>
+
+      {/* Decoy K — wide log terminal, bottom-left */}
+      <div className="rm-decoy dc-k" onClick={() => clickDecoy('k')}>
+        {decoyFlash === 'k' && <div className="dc-denied">⚠ OFFLINE</div>}
+        <div className="dc-title">SYSTEM·LOG</div>
+        <div className="dc-logbox">
+          {[
+            '[03:14:07] ERR  kernel panic — seg fault 0x00ff',
+            '[03:14:09] WARN memory pressure critical',
+            '[03:14:11] ERR  watchdog timeout — reset',
+            '[03:14:13] INFO attempting recovery…',
+            '[03:14:15] ERR  recovery failed',
+          ].map((line,i)=>(
+            <div key={i} className="dc-log-line" style={{animationDelay:`${i*0.3}s`}}>{line}</div>
+          ))}
+        </div>
+      </div>
+
+      {/* Decoy L — wide power graph, bottom centre */}
+      <div className="rm-decoy dc-l" onClick={() => clickDecoy('l')}>
+        {decoyFlash === 'l' && <div className="dc-denied">⚠ OFFLINE</div>}
+        <div className="dc-title">POWER·GRID</div>
+        <div className="dc-powergraph">
+          {[45,60,38,72,55,80,48,65,40,70,58,85,50,62,44].map((h,i)=>(
+            <div key={i} className="dc-pg-bar" style={{height:`${h}%`,animationDelay:`${i*0.12}s`}}/>
+          ))}
+        </div>
+        <div className="dc-wave-footer">
+          <span>LOAD: 84%</span><span>DRAW: 12.4 kW</span><span>BATT: 23%</span>
+        </div>
+      </div>
+
+      {/* Decoy M — camera feeds, bottom-right */}
+      <div className="rm-decoy dc-m" onClick={() => clickDecoy('m')}>
+        {decoyFlash === 'm' && <div className="dc-denied">⚠ OFFLINE</div>}
+        <div className="dc-title">CCTV·FEEDS</div>
+        <div className="dc-cams">
+          {['CAM-1','CAM-2','CAM-3','CAM-4'].map((c,i)=>(
+            <div key={i} className="dc-cam-cell">
+              <div className="dc-cam-noise"/>
+              <span className="dc-cam-lbl">{c}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Decoy N — network topology, right upper-mid */}
+      <div className="rm-decoy dc-n" onClick={() => clickDecoy('n')}>
+        {decoyFlash === 'n' && <div className="dc-denied">⚠ OFFLINE</div>}
+        <div className="dc-title">NET·TOPOLOGY</div>
+        <svg className="dc-topo-svg" viewBox="0 0 100 60">
+          <line x1="50" y1="10" x2="20" y2="40" stroke="#1e3a50" strokeWidth="0.8"/>
+          <line x1="50" y1="10" x2="80" y2="40" stroke="#1e3a50" strokeWidth="0.8"/>
+          <line x1="50" y1="10" x2="50" y2="45" stroke="#1e3a50" strokeWidth="0.8"/>
+          <line x1="20" y1="40" x2="80" y2="40" stroke="#0e2030" strokeWidth="0.5" strokeDasharray="2,2"/>
+          {[[50,10],[20,40],[80,40],[50,45]].map(([x,y],i)=>(
+            <circle key={i} cx={x} cy={y} r="4" fill="#0d1e2c" stroke={i===0?'#cc2200':'#1e3a50'} strokeWidth="1"/>
+          ))}
+        </svg>
+        <div className="dc-status-row"><div className="dc-led dc-led-r"/><span>2 NODES DOWN</span></div>
+      </div>
+
+      {/* Decoy O — thermal readout, mid-centre */}
+      <div className="rm-decoy dc-o" onClick={() => clickDecoy('o')}>
+        {decoyFlash === 'o' && <div className="dc-denied">⚠ OFFLINE</div>}
+        <div className="dc-title">THERMAL·MAP</div>
+        <div className="dc-thermal">
+          {Array.from({length:20}).map((_,i)=>{
+            const heat = [90,75,60,80,95,70,55,85,65,78,92,58,72,88,62,76,82,68,94,73][i]
+            const col = heat>85?'#cc2200':heat>70?'#ff7700':'#1e5a40'
+            return <div key={i} className="dc-th-cell" style={{background:col,opacity:0.5+heat/200}}/>
+          })}
+        </div>
+        <div className="dc-status-row"><div className="dc-led dc-led-r"/><span>OVERHEAT ZONE 3</span></div>
+      </div>
+
+      {/* Decoy P — wide alert console, bottom far-right */}
+      <div className="rm-decoy dc-p" onClick={() => clickDecoy('p')}>
+        {decoyFlash === 'p' && <div className="dc-denied">⚠ OFFLINE</div>}
+        <div className="dc-title">ALERT·CONSOLE</div>
+        {[
+          {col:'#cc2200', msg:'CRITICAL — SECTOR 4 OFFLINE'},
+          {col:'#ff7700', msg:'WARNING  — TEMP THRESHOLD'},
+          {col:'#cc2200', msg:'CRITICAL — AUTH BREACH Z-2'},
+          {col:'#ff7700', msg:'WARNING  — POWER SURGE'},
+        ].map((a,i)=>(
+          <div key={i} className="dc-alert-row" style={{borderLeftColor:a.col,animationDelay:`${i*0.4}s`}}>
+            <div className="dc-led" style={{background:a.col,boxShadow:`0 0 5px ${a.col}`,width:6,height:6,borderRadius:'50%',flexShrink:0}}/>
+            <span>{a.msg}</span>
+          </div>
+        ))}
+      </div>
+
       {/* ─── FLOOR CABLES ─── */}
       <svg className="rm-floor-cables" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
         <path d="M12,0 C18,35 4,52 10,100"  stroke="#0d1e30" strokeWidth="1.1" fill="none" opacity=".7"/>

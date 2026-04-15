@@ -869,16 +869,81 @@
 .dc-zone-st { margin-left:auto; font-size:6px; }
 
 /* Positions — spread across 3 rows × 4 columns */
-/* Row 1 — top (14–20%) */
-.dc-a { left:2%;  top:15%; width:clamp(70px,8%,110px); }   /* far left top */
-.dc-b { left:50%; top:9%;  width:clamp(110px,13%,170px); } /* center top */
-/* Row 2 — middle (37–45%) */
-.dc-c { left:2%;  top:38%; width:clamp(100px,12%,155px); } /* far left mid */
-.dc-d { left:30%; top:42%; width:clamp(100px,11%,150px); } /* center-left mid */
-.dc-g { left:84%; top:40%; width:clamp(90px,10%,135px); }  /* far right mid */
-/* Row 3 — lower (58–65%) */
-.dc-e { left:50%; top:60%; width:clamp(95px,11%,145px); }  /* center lower */
-.dc-f { left:84%; top:58%; width:clamp(110px,13%,165px); } /* far right lower */
+/* Row 1 — top */
+.dc-a { left:2%;  top:15%; width:clamp(70px,8%,110px); }
+.dc-b { left:50%; top:9%;  width:clamp(110px,13%,170px); }
+/* Row 2 — middle */
+.dc-c { left:2%;  top:38%; width:clamp(100px,12%,155px); }
+.dc-d { left:30%; top:42%; width:clamp(100px,11%,150px); }
+.dc-g { left:84%; top:40%; width:clamp(90px,10%,135px); }
+/* Row 3 — lower */
+.dc-e { left:50%; top:60%; width:clamp(95px,11%,145px); }
+.dc-f { left:84%; top:58%; width:clamp(110px,13%,165px); }
+
+/* Extra panels */
+.dc-h { left:2%;  top:14%; width:clamp(130px,15%,210px); }  /* wide map — top-left */
+.dc-i { left:14%; top:37%; width:clamp(80px,9%,125px); }    /* tall status — left-mid */
+.dc-j { left:56%; top:14%; width:clamp(150px,17%,240px); }  /* wide signal — top-centre-right */
+.dc-k { left:2%;  top:60%; width:clamp(160px,18%,250px); }  /* wide log — bottom-left */
+.dc-l { left:28%; top:62%; width:clamp(150px,17%,230px); }  /* wide power — bottom-centre */
+.dc-m { left:63%; top:60%; width:clamp(140px,16%,210px); }  /* cam feeds — bottom-right */
+.dc-n { left:84%; top:15%; width:clamp(90px,10%,135px); }   /* network — right upper-mid */
+.dc-o { left:44%; top:38%; width:clamp(110px,12%,165px); }  /* thermal — mid-centre */
+.dc-p { left:63%; top:58%; width:clamp(150px,17%,220px); }  /* alert console — bottom far-right */
+
+/* ── Big map panel ── */
+.dc-bigmap {
+  position:relative; width:100%; height:clamp(50px,7svh,90px);
+  background:#010c12; border:1px solid #0a1e2e; overflow:hidden;
+}
+.dc-grid-lines {
+  position:absolute; inset:0;
+  background:
+    repeating-linear-gradient(90deg, transparent, transparent 14px, rgba(0,30,55,.25) 14px, rgba(0,30,55,.25) 15px),
+    repeating-linear-gradient(0deg,  transparent, transparent 10px, rgba(0,30,55,.2)  10px, rgba(0,30,55,.2)  11px);
+}
+.dc-map-node {
+  position:absolute; width:5px; height:5px; border-radius:50%;
+  background:rgba(0,180,240,.7); box-shadow:0 0 6px rgba(0,180,240,.6);
+  transform:translate(-50%,-50%); animation:dot-blink 3s ease-in-out infinite;
+}
+.dc-map-label { position:absolute; font-size:5px; color:rgba(0,130,180,.5); }
+
+/* ── Node status column ── */
+.dc-node-row { display:flex; align-items:center; gap:5px; padding:2px 0; border-bottom:1px solid #0a1820; }
+.dc-node-row span { font-size:7px; color:#1a3040; flex:1; }
+.dc-node-val { font-size:6px !important; flex:0 !important; }
+
+/* ── Waveform ── */
+.dc-waveform { display:flex; align-items:center; gap:1.5px; height:clamp(28px,4svh,50px); margin:4px 0; }
+.dc-wf-bar { width:3px; background:rgba(0,212,255,.55); border-radius:1px; animation:bar-pulse 1.8s ease-in-out infinite; min-height:3px; }
+.dc-wave-footer { display:flex; justify-content:space-between; font-size:6px; color:#1a3040; padding-top:3px; }
+
+/* ── Log terminal ── */
+.dc-logbox { background:#010c06; border:1px solid #0a2010; padding:4px 6px; }
+.dc-log-line { font-size:6px; color:rgba(0,190,50,.5); font-family:'Courier New',monospace; padding:1px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; animation:blink 8s step-end infinite; }
+
+/* ── Power graph ── */
+.dc-powergraph { display:flex; align-items:flex-end; gap:2px; height:clamp(32px,4.5svh,55px); margin:4px 0; }
+.dc-pg-bar { flex:1; background:linear-gradient(to top, rgba(255,170,0,.7), rgba(255,170,0,.2)); border-radius:1px 1px 0 0; min-height:3px; animation:bar-pulse 2.5s ease-in-out infinite; }
+
+/* ── CCTV grid ── */
+.dc-cams { display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-top:4px; }
+.dc-cam-cell { position:relative; background:#020808; border:1px solid #0a1e14; aspect-ratio:4/3; overflow:hidden; }
+.dc-cam-noise { position:absolute; inset:0; opacity:.18;
+  background:repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,180,60,.15) 2px, rgba(0,180,60,.15) 3px);
+  animation:ms-scroll 4s linear infinite; }
+.dc-cam-lbl { position:absolute; bottom:2px; left:3px; font-size:5px; color:rgba(0,180,60,.5); }
+
+/* ── Network topology SVG ── */
+.dc-topo-svg { width:100%; height:clamp(40px,6svh,70px); display:block; margin:4px 0; }
+
+/* ── Thermal grid ── */
+.dc-thermal { display:grid; grid-template-columns:repeat(5,1fr); gap:2px; margin:4px 0; }
+.dc-th-cell { aspect-ratio:1; border-radius:1px; }
+
+/* ── Alert rows ── */
+.dc-alert-row { display:flex; align-items:center; gap:5px; padding:3px 4px; border-left:2px solid; margin:2px 0; background:rgba(0,0,0,.3); font-size:6px; color:#1e3a50; animation:blink 6s step-end infinite; }
 
 /* Hover hint — revealed only on hover */
 .rm-hint {
