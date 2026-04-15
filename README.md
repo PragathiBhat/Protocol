@@ -1,4 +1,4 @@
-# Escape Alexanderplatz
+# PROTOCOL
 
 A browser-based interactive escape room game set inside a control room that manages a city producing more data than can be interpreted.
 
