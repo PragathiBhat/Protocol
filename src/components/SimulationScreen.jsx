@@ -525,63 +525,88 @@ export default function SimulationScreen({ times = {}, onExit }) {
     }
 
     function buildEnvironment() {
-      // ── Deep red hazy sky ──
-      scene.background = new THREE.Color(0x6a0a00)
-      scene.fog = new THREE.FogExp2(0x991100, 0.024)
-      ambient.color.set(0xff3311); ambient.intensity = 0.9
-      sun.color.set(0xff1100); sun.intensity = 2.2
-      fill.color.set(0xcc2200); fill.intensity = 0.6
+      // ── Hazy dusk sky — toned down, buildings visible ──
+      scene.background = new THREE.Color(0x1a0d08)
+      scene.fog = new THREE.FogExp2(0x3a1a0a, 0.013)
+      ambient.color.set(0xcc6633); ambient.intensity = 0.55
+      sun.color.set(0xff6633); sun.intensity = 0.9
+      fill.color.set(0xaa4422); fill.intensity = 0.35
       // Scorched ground
-      ground.material.map = null; ground.material.color.set(0x6e2008)
+      ground.material.map = null; ground.material.color.set(0x2e1208)
 
-      // Red heat point lights — low, intense
-      const heatA = new THREE.PointLight(0xff1100, 4.0, 55)
+      // Softer heat point lights
+      const heatA = new THREE.PointLight(0xff4422, 1.4, 45)
       heatA.position.set(0, 1.5, 0); scene.add(heatA)
-      const heatB = new THREE.PointLight(0xff4400, 2.5, 35)
+      const heatB = new THREE.PointLight(0xff6633, 0.9, 30)
       heatB.position.set(18, 1, -12); scene.add(heatB)
-      const heatC = new THREE.PointLight(0xff2200, 2.0, 30)
+      const heatC = new THREE.PointLight(0xff5522, 0.7, 25)
       heatC.position.set(-15, 1, 14); scene.add(heatC)
 
       scene.add(buildTVTower())
       scene.add(buildWorldClock())
-      scene.add(buildRingBuildings({ color: 0x5a1a08 }))
+      scene.add(buildRingBuildings({ color: 0x7a3a18 }))
       scene.add(buildFountain())
 
       // Charred bare tree stumps
       for (let i = 0; i < 18; i++) {
         const trunk = new THREE.Mesh(
           new THREE.CylinderGeometry(0.1, 0.18, 2.5 + Math.random() * 2, 5),
-          new THREE.MeshLambertMaterial({ color: 0x150500 })
+          new THREE.MeshLambertMaterial({ color: 0x1e0a04 })
         )
         trunk.position.set((Math.random() - 0.5) * 55, 1.4, (Math.random() - 0.5) * 55)
         scene.add(trunk)
       }
 
-      // Rising heat shimmer particles (red/orange, float upward)
-      const emberColors = [0xff1100, 0xff3300, 0xff5500, 0xff7700, 0xdd0000]
-      for (let i = 0; i < 80; i++) {
-        const size = 0.04 + Math.random() * 0.13
+      // Reduced embers — small, subtle
+      const emberColors = [0xff4400, 0xff6600, 0xff8800, 0xffaa00]
+      for (let i = 0; i < 35; i++) {
+        const size = 0.03 + Math.random() * 0.07
         const ep = new THREE.Mesh(
           new THREE.SphereGeometry(size, 4, 3),
           new THREE.MeshBasicMaterial({
             color: emberColors[Math.floor(Math.random() * emberColors.length)],
             transparent: true,
-            opacity: 0.5 + Math.random() * 0.45,
+            opacity: 0.35 + Math.random() * 0.3,
           })
         )
-        ep.position.set((Math.random() - 0.5) * 65, Math.random() * 18, (Math.random() - 0.5) * 65)
-        ep.userData.rise = 0.025 + Math.random() * 0.045
+        ep.position.set((Math.random() - 0.5) * 60, Math.random() * 14, (Math.random() - 0.5) * 60)
+        ep.userData.rise = 0.018 + Math.random() * 0.03
         animated.push(ep); scene.add(ep)
       }
 
-      // Falling heavy smog clumps (dark red-brown)
-      for (let i = 0; i < 50; i++) {
-        const sp = new THREE.Mesh(
-          new THREE.SphereGeometry(0.09 + Math.random() * 0.08, 4, 4),
-          new THREE.MeshBasicMaterial({ color: 0x550800, transparent: true, opacity: 0.7 })
+      // ── Smoke plumes rising from the ground ──
+      const smokeColors = [0x444444, 0x333333, 0x555555, 0x3a3028, 0x4a3830]
+      for (let i = 0; i < 45; i++) {
+        const size = 0.35 + Math.random() * 0.7
+        const smoke = new THREE.Mesh(
+          new THREE.SphereGeometry(size, 6, 5),
+          new THREE.MeshBasicMaterial({
+            color: smokeColors[Math.floor(Math.random() * smokeColors.length)],
+            transparent: true,
+            opacity: 0.18 + Math.random() * 0.22,
+          })
         )
-        sp.position.set((Math.random() - 0.5) * 65, Math.random() * 20, (Math.random() - 0.5) * 65)
-        sp.userData.fall = 0.005 + Math.random() * 0.012
+        // Start at or just above ground, spread across scene
+        smoke.position.set(
+          (Math.random() - 0.5) * 70,
+          Math.random() * 5,         // low starting height
+          (Math.random() - 0.5) * 70
+        )
+        smoke.userData.rise     = 0.012 + Math.random() * 0.022   // slower than embers
+        smoke.userData.drift    = (Math.random() - 0.5) * 0.006   // slight horizontal drift
+        smoke.userData.maxY     = 18 + Math.random() * 10         // fade out height
+        smoke.userData.baseOpac = smoke.material.opacity
+        animated.push(smoke); scene.add(smoke)
+      }
+
+      // Falling heavy smog clumps — reduced and lighter
+      for (let i = 0; i < 25; i++) {
+        const sp = new THREE.Mesh(
+          new THREE.SphereGeometry(0.08 + Math.random() * 0.07, 4, 4),
+          new THREE.MeshBasicMaterial({ color: 0x3a2010, transparent: true, opacity: 0.45 })
+        )
+        sp.position.set((Math.random() - 0.5) * 60, Math.random() * 18, (Math.random() - 0.5) * 60)
+        sp.userData.fall = 0.004 + Math.random() * 0.009
         animated.push(sp); scene.add(sp)
       }
 
@@ -1143,10 +1168,19 @@ export default function SimulationScreen({ times = {}, onExit }) {
           }
         } else if (o.userData.rise !== undefined) {
           o.position.y += o.userData.rise * S
-          if (o.position.y > 20) {
+          // Smoke: horizontal drift + fade as it rises
+          if (o.userData.drift !== undefined) {
+            o.position.x += o.userData.drift * S
+            const maxY = o.userData.maxY || 20
+            const t = Math.min(o.position.y / maxY, 1)
+            o.material.opacity = o.userData.baseOpac * (1 - t * t)
+          }
+          const ceiling = o.userData.maxY || 20
+          if (o.position.y > ceiling) {
             o.position.y = 0.05
             o.position.x = (Math.random() - 0.5) * 65
             o.position.z = (Math.random() - 0.5) * 65
+            if (o.userData.baseOpac !== undefined) o.material.opacity = o.userData.baseOpac
           }
         } else if (o.userData.wobble !== undefined) {
           o.position.y -= o.userData.fall * S
