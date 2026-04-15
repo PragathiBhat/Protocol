@@ -826,7 +826,7 @@
 /* ── MONITORS (People) — centre of room ── */
 .rm-monitors {
   left:16%; right:17%;
-  top:16%;
+  top:18%;
   /* no fixed height — content defines it */
 }
 .mon-group {
@@ -931,7 +931,7 @@
 
 /* ── FILING CABINET (Memory) ── */
 .rm-cabinet {
-  left:2%; top:26%;
+  left:2%; top:17%;
   width:clamp(72px,8.5%,120px);
   background:linear-gradient(to right,#0f1d2c,#141e2e);
   border:2px solid #1a2e48;
@@ -962,7 +962,7 @@
 
 /* ── GAUGES (Environment) ── */
 .rm-gauges {
-  left:69%; top:14%;
+  left:70%; top:53%;
   width:clamp(120px,16%,210px);
   background:#09141e; border:2px solid #162434;
   padding:clamp(8px,1svh,14px) clamp(10px,1.2%,16px) clamp(12px,1.5svh,18px);
@@ -999,7 +999,7 @@
 
 /* ── DATA TICKER (Economy) ── */
 .rm-ticker {
-  left:18%; top:8%;
+  left:40%; top:55%;
   width:clamp(120px,15%,200px);
   background:#050d18; border:2px solid #162434;
   box-shadow:0 0 30px rgba(0,0,0,.9);
@@ -1015,7 +1015,7 @@
 
 /* ── SERVER RACK (Infrastructure) ── */
 .rm-server {
-  left:69%; top:42%;
+  left:70%; top:14%;
   width:clamp(110px,14%,190px);
   background:#09141e; border:2px solid #162434;
   padding:clamp(8px,1svh,14px) clamp(10px,1.2%,16px);
