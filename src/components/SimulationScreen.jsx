@@ -640,9 +640,9 @@ export default function SimulationScreen({ times = {}, onExit }) {
         scene.add(sign)
       })
 
-      // Hunched, struggling survivors
-      for (let i = 0; i < 12; i++) {
-        const n = makeNPC({ hunched: true, speed: 0.012, color: 0x3a1a0a })
+      // Hunched, struggling survivors — more of them, slightly faster so movement is visible
+      for (let i = 0; i < 20; i++) {
+        const n = makeNPC({ hunched: true, speed: 0.022 + Math.random() * 0.018, color: 0x3a1a0a })
         npcs.push(n); scene.add(n)
       }
     }
@@ -757,9 +757,14 @@ export default function SimulationScreen({ times = {}, onExit }) {
         scene.add(sign)
       })
 
-      // Panicking NPCs
-      for (let i = 0; i < 14; i++) {
-        const n = makeNPC({ speed: 0.09, retarget: 100 })
+      // Busy commuters and shoppers — varied speeds
+      for (let i = 0; i < 24; i++) {
+        const colors = [0xddbb88, 0xccaa77, 0xbbaa99, 0x998877, 0xeeccaa]
+        const n = makeNPC({
+          speed: 0.04 + Math.random() * 0.06,
+          retarget: 80 + Math.floor(Math.random() * 80),
+          color: colors[Math.floor(Math.random() * colors.length)],
+        })
         npcs.push(n); scene.add(n)
       }
     }
@@ -918,8 +923,12 @@ export default function SimulationScreen({ times = {}, onExit }) {
       })
 
       // ── Panicking people running in all directions ──
-      for (let i = 0; i < 22; i++) {
-        const n = makeNPC({ speed: 0.08 + Math.random()*0.07, retarget: 50 + Math.floor(Math.random()*70) })
+      for (let i = 0; i < 28; i++) {
+        const n = makeNPC({
+          speed: 0.07 + Math.random() * 0.09,
+          retarget: 30 + Math.floor(Math.random() * 60),
+          color: 0x887766,
+        })
         npcs.push(n); scene.add(n)
       }
     }
@@ -1050,8 +1059,14 @@ export default function SimulationScreen({ times = {}, onExit }) {
         scene.add(board)
       })
 
-      for (let i = 0; i < 10; i++) {
-        const n = makeNPC({ speed: 0.02, color: 0xaaaaaa })
+      // Wandering figures — medium pace, grey tones to match Memory world
+      for (let i = 0; i < 18; i++) {
+        const greys = [0xaaaaaa, 0x999999, 0xbbbbbb, 0x888888, 0xcccccc]
+        const n = makeNPC({
+          speed: 0.038 + Math.random() * 0.03,
+          retarget: 90 + Math.floor(Math.random() * 80),
+          color: greys[Math.floor(Math.random() * greys.length)],
+        })
         npcs.push(n); scene.add(n)
       }
     }
