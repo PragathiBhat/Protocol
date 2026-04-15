@@ -2,6 +2,109 @@
    PROTOCOL — Game Styles
    ============================================================ */
 
+/* ── CUSTOM CURSOR ── */
+*, *::before, *::after { cursor: none !important; }
+
+.custom-cursor {
+  position: fixed;
+  pointer-events: none;
+  z-index: 999999;
+  transform: translate(-50%, -50%);
+  width: 0; height: 0;   /* anchor point is the exact mouse position */
+}
+
+/* Center dot */
+.cur-dot {
+  position: absolute;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #ff1a78;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 8px 2px rgba(255,26,120,.9);
+  transition: transform .12s, background .15s;
+}
+
+/* Rings */
+.cur-ring {
+  position: absolute;
+  border-radius: 50%;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+.cur-ring-inner {
+  width: 20px; height: 20px;
+  border: 1px solid rgba(0,212,255,.7);
+  border-top-color: #00d4ff;
+  border-right-color: transparent;
+  animation: cur-spin 2s linear infinite;
+  transition: width .15s, height .15s;
+}
+.cur-ring-outer {
+  width: 34px; height: 34px;
+  border: 1px dashed rgba(0,212,255,.3);
+  border-bottom-color: rgba(255,26,120,.5);
+  animation: cur-spin-rev 4s linear infinite;
+  transition: width .15s, height .15s;
+}
+
+/* Corner brackets */
+.cur-bracket {
+  position: absolute;
+  width: 7px; height: 7px;
+  transition: all .15s;
+}
+.cur-tl { top:-20px;    left:-20px;    border-top:1.5px solid #00d4ff; border-left:1.5px solid #00d4ff;   }
+.cur-tr { top:-20px;    right:-20px;   border-top:1.5px solid #00d4ff; border-right:1.5px solid #00d4ff;  }
+.cur-bl { bottom:-20px; left:-20px;    border-bottom:1.5px solid #00d4ff; border-left:1.5px solid #00d4ff;  }
+.cur-br { bottom:-20px; right:-20px;   border-bottom:1.5px solid #00d4ff; border-right:1.5px solid #00d4ff; }
+
+/* Crosshair lines */
+.cur-cross {
+  position: absolute;
+  background: rgba(0,212,255,.25);
+  top: 50%; left: 50%;
+}
+.cur-cross-h { width: 12px; height: 1px; transform: translate(-50%, -50%); }
+.cur-cross-v { width: 1px; height: 12px; transform: translate(-50%, -50%); }
+
+/* Animations */
+@keyframes cur-spin     { to { transform: translate(-50%,-50%) rotate(360deg);  } }
+@keyframes cur-spin-rev { to { transform: translate(-50%,-50%) rotate(-360deg); } }
+
+/* ── Hover state (over clickable elements) ── */
+.cur-hover .cur-dot {
+  background: #fff;
+  transform: translate(-50%,-50%) scale(1.6);
+  box-shadow: 0 0 12px 4px rgba(255,26,120,1);
+}
+.cur-hover .cur-ring-inner {
+  width: 28px; height: 28px;
+  border-color: rgba(255,26,120,.9);
+  border-top-color: #ff1a78;
+  border-right-color: transparent;
+  animation-duration: .8s;
+}
+.cur-hover .cur-ring-outer {
+  width: 46px; height: 46px;
+  border-color: rgba(255,26,120,.4);
+}
+.cur-hover .cur-bracket {
+  border-color: #ff1a78;
+}
+.cur-hover .cur-tl { top:-26px;    left:-26px;    }
+.cur-hover .cur-tr { top:-26px;    right:-26px;   }
+.cur-hover .cur-bl { bottom:-26px; left:-26px;    }
+.cur-hover .cur-br { bottom:-26px; right:-26px;   }
+
+/* ── Click pulse ── */
+.cur-click .cur-ring-inner {
+  animation: cur-click-pulse .15s ease-out;
+}
+@keyframes cur-click-pulse {
+  0%   { transform: translate(-50%,-50%) scale(1);   opacity:1; }
+  100% { transform: translate(-50%,-50%) scale(2.2); opacity:0; }
+}
+
 /* ── MUSIC PLAYER ── */
 .music-player {
   position: fixed;

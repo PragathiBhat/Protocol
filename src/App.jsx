@@ -3,6 +3,7 @@ import IntroScreen from './components/IntroScreen'
 import MainRoom from './components/MainRoom'
 import CityScreen from './components/CityScreen'
 import MusicPlayer from './components/MusicPlayer'
+import CustomCursor from './components/CustomCursor'
 import './App.css'
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
   return (
     <div className="game-root">
       <MusicPlayer />
+      <CustomCursor />
       {phase === 'intro' && (
         <IntroScreen onEnter={() => setPhase('room')} />
       )}
