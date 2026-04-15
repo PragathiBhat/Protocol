@@ -412,17 +412,19 @@ export default function MainRoom({ scores, times = {}, onUpdateScore, onUpdateTi
         ))}
       </div>
 
-      {/* ─── PINK QUESTION MARKS — floor centre ─── */}
+      {/* ─── PINK QUESTION MARKS — scattered across room ─── */}
       <div className="rm-qmarks" aria-hidden>
         {[
-          { l:'22%', b:'12%', size:'5.5vw', rot:'-8deg',  delay:'0s'    },
-          { l:'33%', b:'7%',  size:'7vw',   rot:'4deg',   delay:'0.6s'  },
-          { l:'45%', b:'14%', size:'6vw',   rot:'-3deg',  delay:'1.1s'  },
-          { l:'56%', b:'8%',  size:'7.5vw', rot:'7deg',   delay:'0.3s'  },
-          { l:'67%', b:'11%', size:'5.5vw', rot:'-5deg',  delay:'0.9s'  },
+          { l:'7%',  t:'24%', size:'4vw',   rot:'12deg',  delay:'0s'   },
+          { l:'80%', t:'20%', size:'3.5vw', rot:'-9deg',  delay:'0.5s' },
+          { l:'22%', t:'48%', size:'5.5vw', rot:'-12deg', delay:'1.1s' },
+          { l:'60%', t:'43%', size:'4.5vw', rot:'7deg',   delay:'0.3s' },
+          { l:'44%', t:'68%', size:'6vw',   rot:'-4deg',  delay:'0.8s' },
+          { l:'88%', t:'60%', size:'3.8vw', rot:'14deg',  delay:'1.4s' },
+          { l:'35%', t:'32%', size:'3.2vw', rot:'-7deg',  delay:'0.6s' },
         ].map((q, i) => (
           <div key={i} className="rm-qmark" style={{
-            left: q.l, bottom: q.b,
+            left: q.l, top: q.t,
             fontSize: q.size,
             transform: `rotate(${q.rot})`,
             animationDelay: q.delay,

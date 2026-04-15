@@ -868,14 +868,17 @@
 .dc-zone-row span { font-size:7px; color:#1a3040; }
 .dc-zone-st { margin-left:auto; font-size:6px; }
 
-/* Positions */
-.dc-a { left:3%;  top:40%; width:clamp(70px,8%,110px); }
-.dc-b { left:31%; top:8%;  width:clamp(110px,13%,170px); }
-.dc-c { left:56%; top:14%; width:clamp(100px,12%,155px); }
-.dc-d { left:3%;  top:62%; width:clamp(100px,11%,150px); }
-.dc-e { left:28%; top:55%; width:clamp(95px,11%,145px); }
-.dc-f { left:56%; top:55%; width:clamp(110px,13%,165px); }
-.dc-g { left:83%; top:36%; width:clamp(90px,10%,135px); }
+/* Positions — spread across 3 rows × 4 columns */
+/* Row 1 — top (14–20%) */
+.dc-a { left:2%;  top:15%; width:clamp(70px,8%,110px); }   /* far left top */
+.dc-b { left:50%; top:9%;  width:clamp(110px,13%,170px); } /* center top */
+/* Row 2 — middle (37–45%) */
+.dc-c { left:2%;  top:38%; width:clamp(100px,12%,155px); } /* far left mid */
+.dc-d { left:30%; top:42%; width:clamp(100px,11%,150px); } /* center-left mid */
+.dc-g { left:84%; top:40%; width:clamp(90px,10%,135px); }  /* far right mid */
+/* Row 3 — lower (58–65%) */
+.dc-e { left:50%; top:60%; width:clamp(95px,11%,145px); }  /* center lower */
+.dc-f { left:84%; top:58%; width:clamp(110px,13%,165px); } /* far right lower */
 
 /* Hover hint — revealed only on hover */
 .rm-hint {
@@ -916,8 +919,8 @@
 
 /* ── MONITORS (People) — centre of room ── */
 .rm-monitors {
-  left:16%; right:17%;
-  top:18%;
+  left:22%; right:22%;
+  top:17%;
   /* no fixed height — content defines it */
 }
 .mon-group {
@@ -1022,7 +1025,7 @@
 
 /* ── FILING CABINET (Memory) ── */
 .rm-cabinet {
-  left:2%; top:17%;
+  left:2%; top:58%;
   width:clamp(72px,8.5%,120px);
   background:linear-gradient(to right,#0f1d2c,#141e2e);
   border:2px solid #1a2e48;
@@ -1053,7 +1056,7 @@
 
 /* ── GAUGES (Environment) ── */
 .rm-gauges {
-  left:70%; top:53%;
+  left:68%; top:37%;
   width:clamp(120px,16%,210px);
   background:#09141e; border:2px solid #162434;
   padding:clamp(8px,1svh,14px) clamp(10px,1.2%,16px) clamp(12px,1.5svh,18px);
@@ -1090,7 +1093,7 @@
 
 /* ── DATA TICKER (Economy) ── */
 .rm-ticker {
-  left:40%; top:55%;
+  left:30%; top:60%;
   width:clamp(120px,15%,200px);
   background:#050d18; border:2px solid #162434;
   box-shadow:0 0 30px rgba(0,0,0,.9);
@@ -1106,7 +1109,7 @@
 
 /* ── SERVER RACK (Infrastructure) ── */
 .rm-server {
-  left:70%; top:14%;
+  left:84%; top:14%;
   width:clamp(110px,14%,190px);
   background:#09141e; border:2px solid #162434;
   padding:clamp(8px,1svh,14px) clamp(10px,1.2%,16px);
