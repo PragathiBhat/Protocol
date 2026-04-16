@@ -4,10 +4,11 @@ import MainRoom from './components/MainRoom'
 import CityScreen from './components/CityScreen'
 import MusicPlayer from './components/MusicPlayer'
 import CustomCursor from './components/CustomCursor'
+import CinematicIntro from './components/CinematicIntro'
 import './App.css'
 
 function App() {
-  const [phase, setPhase] = useState('intro') // 'intro' | 'room' | 'city'
+  const [phase, setPhase] = useState('cinematic') // 'cinematic' | 'intro' | 'room' | 'city'
   const [scores, setScores] = useState({
     people: null,         // 0–100  (population density)
     memory: null,         // 'preserve' | 'reduce' | 'erase'
@@ -32,6 +33,9 @@ function App() {
     <div className="game-root">
       <MusicPlayer />
       <CustomCursor />
+      {phase === 'cinematic' && (
+        <CinematicIntro onComplete={() => setPhase('intro')} />
+      )}
       {phase === 'intro' && (
         <IntroScreen onEnter={() => setPhase('room')} />
       )}
